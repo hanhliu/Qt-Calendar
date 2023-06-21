@@ -1,138 +1,105 @@
-from PySide6.QtWidgets import QApplication, QWidget, QGridLayout, QLabel, QPushButton, QStackedWidget, QTreeView, QAbstractItemView, QVBoxLayout
-from PySide6.QtGui import QStandardItemModel, QStandardItem, QDrag
-from PySide6.QtCore import Qt, QMimeData, QPoint
+import math
+import random
 
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QGridLayout, QLabel, QPushButton, QHBoxLayout, QStackedWidget
 
-class DraggableLabel(QLabel):
-    def __init__(self, text, position):
-        super().__init__(text)
-        self.position = position
-        self.setAcceptDrops(True)
-
-    def mousePressEvent(self, event):
-        if event.button() == Qt.LeftButton:
-            drag = QDrag(self)
-            mime_data = QMimeData()
-            mime_data.setText(self.text())
-            drag.setMimeData(mime_data)
-            drag.exec_(Qt.MoveAction)
-
-    def dragEnterEvent(self, event):
-        print("HanhLT: accent drag Enter Event")
-        if event.mimeData().hasFormat("text/plain"):
-            event.acceptProposedAction()
-
-    def dropEvent(self, event):
-        print("HanhLT: accept drop event")
-        mime_data = event.mimeData()
-        if mime_data.hasText():
-            print("HanhLT: mim data hasText  ")
-            text = mime_data.text()
-            event.acceptProposedAction()
-            # Find the position of the dropped label in the grid layout
-            position = self.position
-
-            # Create a new QLabel with the dropped text
-            new_label = QLabel(text)
-
-            # Add the new QLabel to the QStackedWidget
-            stacked_widget = self.parent()
-            stacked_widget.addWidget(new_label)
-            stacked_widget.setCurrentWidget(new_label)
-
-            print(
-                f"Added new QLabel with text '{text}' to the QStackedWidget at position: row={position.x()}, column={position.y()}")
-
-        # Get the position of the dropped label from the custom property
-            # position = self.property("position")
-            # if position is not None:
-            #     grid_position = position
-            #     print(
-            #         f"Added new QLabel with text '{text}' to the QStackedWidget at position: row={grid_position.x()}, column={grid_position.y()}")
-            #
-            #     # Create a new QLabel with the dropped text
-            #     new_label = QLabel(text)
-            #
-            #     # Add the new QLabel to the QStackedWidget
-            #     stacked_widget = self.parent().parent()
-            #     stacked_widget.addWidget(new_label)
-            #     stacked_widget.setCurrentWidget(new_label)
-
-
-class MainWindow(QWidget):
+class MyWindow(QWidget):
     def __init__(self):
         super().__init__()
+        self.initUI()
 
-        # Create a QVBoxLayout to hold the tree view and the grid layout
-        layout = QVBoxLayout(self)
+    def initUI(self):
+        self.root_stackedwidget = QStackedWidget()
+        self.root_stackedwidget.addWidget(QWidget())
+        self.grid_size = 4
+        self.my_dict = {}
+        page_index = 0
 
-        # Create a QTreeView
-        self.tree_view = QTreeView(self)
-        self.tree_view.setSelectionMode(QAbstractItemView.SingleSelection)
-        self.tree_view.setDragEnabled(True)
-        self.tree_view.setAcceptDrops(False)
-        self.tree_view.setDragDropMode(QAbstractItemView.InternalMove)
-        self.tree_view.pressed.connect(self.start_drag)
+        string1 = "New String 1"
+        string2 = "New String 2"
+        # Insert string1 at position 1
+        self.my_dict[1] = string1
 
-        # Create a QStandardItemModel for the tree view
-        self.tree_model = QStandardItemModel(self)
-        self.tree_view.setModel(self.tree_model)
+        # Insert string2 at position 3
+        self.my_dict[5] = string2
 
-        # Add five QLabel items to the tree view
-        for i in range(5):
-            item = QStandardItem(f"Label {i+1}")
-            self.tree_model.appendRow(item)
-
-        # Add the tree view to the layout
-        layout.addWidget(self.tree_view)
-
-        # Create a QGridLayout
-        grid_layout = QGridLayout()
-
-        # Add four QStackedWidget items to the grid layout
-        for i in range(16):
-            # Create a QStackedWidget
-            stacked_widget = QStackedWidget()
-
-            # Create a QLabel and QPushButton
-            label = DraggableLabel(f"Label {i+1}",  QPoint(i // 4, i % 4))
-            button = QPushButton(f"Button {i+1}")
-
-            # Add the QLabel and QPushButton to the QStackedWidget
-            stacked_widget.addWidget(label)
-            stacked_widget.addWidget(button)
-
-            # Set the current widget in the QStackedWidget
-            stacked_widget.setCurrentIndex(0)
-
-            # Set the custom property to store the position
-            label.setProperty("position", QPoint(i // 4, i % 4))
-
-            # Add the QStackedWidget to the grid layout
-            grid_layout.addWidget(stacked_widget, i // 4, i % 4)
-
-        # Add the grid layout to the layout
-        layout.addLayout(grid_layout)
-
-        # Set the layout for the main window
+        layout = QVBoxLayout()
         self.setLayout(layout)
 
-    # Connect the signals for dragging
-    def start_drag(self, index):
-        print("HanhLT: start drag  ")
-        item = self.tree_model.itemFromIndex(index)
-        if item is not None and item.isDragEnabled():
-            drag = QDrag(self.tree_view)
-            mime_data = QMimeData()
-            mime_data.setText(item.text())
-            drag.setMimeData(mime_data)
-            drag.exec(Qt.CopyAction)
+        button1 = QPushButton("Next")
+        button1.clicked.connect(self.nextPage)
+        button2 = QPushButton("Previous")
+        button2.clicked.connect(self.previousPage)
+        hBoxLayout = QHBoxLayout()
+        hBoxLayout.addWidget(button1)
+        hBoxLayout.addWidget(button2)
 
-# Create a Qt application
-app = QApplication([])
-window = MainWindow()
-window.show()
-app.exec()
+        button3 = QPushButton("2x2")
+        button3.clicked.connect(self.Button3Clicked)
+        layout.addWidget(button3)
 
+        button5 = QPushButton("3x3")
+        button5.clicked.connect(self.Button5Clicked)
+        layout.addWidget(button5)
 
+        button4 = QPushButton("4x4")
+        button4.clicked.connect(self.Button4Clicked)
+        layout.addWidget(button4)
+        layout.addLayout(hBoxLayout)
 
+        self.grid = QGridLayout()
+        self.root_stackedwidget.widget(page_index).setLayout(self.grid)
+
+        layout.addWidget(self.root_stackedwidget)
+        self.labels = []
+        self.setupGridLayout()
+
+    def setupGridLayout(self):
+        for label in self.labels:
+            label.setParent(None)
+        self.labels.clear()
+        for i in range(self.grid_size):
+            row = i // math.sqrt(self.grid_size)
+            col = i % math.sqrt(self.grid_size)
+            label = QLabel(f"Label {row}-{col}")
+            self.labels.append(label)
+            for k, label in enumerate(self.labels):
+                if k in self.my_dict:
+                    label.setText(self.my_dict[k])
+            self.grid.addWidget(label, row, col, Qt.AlignmentFlag.AlignCenter)
+
+    def nextPage(self):
+        if self.root_stackedwidget.count() == 1:
+            return
+        currentIndex = self.root_stackedwidget.currentIndex()
+        nextPageIndex = (currentIndex + 1) % self.root_stackedwidget.count()
+        self.root_stackedwidget.setCurrentIndex(nextPageIndex)
+
+    def previousPage(self):
+        if self.root_stackedwidget.count() == 1:
+            return
+        currentIndex = self.root_stackedwidget.currentIndex()
+        previousPageIndex = (currentIndex - 1) % self.root_stackedwidget.count()
+        self.root_stackedwidget.setCurrentIndex(previousPageIndex)
+
+    def Button3Clicked(self):
+        self.grid_size = 4
+        self.grid.setSizeConstraint(QGridLayout.SetFixedSize)
+        self.setupGridLayout()
+
+    def Button5Clicked(self):
+        self.grid_size = 9
+        self.grid.setSizeConstraint(QGridLayout.SetFixedSize)
+        self.setupGridLayout()
+
+    def Button4Clicked(self):
+        self.grid_size = 16
+        self.grid.setSizeConstraint(QGridLayout.SetFixedSize)
+        self.setupGridLayout()
+
+if __name__ == '__main__':
+    app = QApplication([])
+    window = MyWindow()
+    window.show()
+    app.exec()
