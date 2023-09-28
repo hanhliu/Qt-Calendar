@@ -520,8 +520,8 @@ class TimePickerWidget(QWidget):
         # getting current datetime
         self.end_time_value = self.__end_time_edit.time()
 
-# if __name__ == "__main__":
-#     app = QApplication(sys.argv)
-#     viewer = MonthViewer()
-#     viewer.show()
-#     sys.exit(app.exec())
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    viewer = MonthViewer()
+    viewer.show()
+    sys.exit(app.exec())

@@ -1,105 +1,178 @@
-import math
-import random
-
+import sys, os
+from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, \
+    QHBoxLayout, QSpacerItem, QSizePolicy
+from PySide6.QtGui import QPixmap, QPalette, QGuiApplication, QColor, QPainter, QFont
 from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QGridLayout, QLabel, QPushButton, QHBoxLayout, QStackedWidget
 
-class MyWindow(QWidget):
+from pathlib import Path
+
+basedir = os.path.dirname(__file__)
+
+
+class ClickableQLabel(QLabel):
+    def __init__(self, title):
+        super().__init__()
+        self.title = title
+        self.setText(self.title)
+
+    def enterEvent(self, event):
+        f = QFont()
+        f.setUnderline(True)
+        self.setFont(f)
+
+    def leaveEvent(self, event):
+        f = QFont()
+        f.setUnderline(False)
+        self.setFont(f)
+
+    def mousePressEvent(self, ev):
+        print("HanhLT: mouse press click ")
+
+
+class LoginForm(QWidget):
     def __init__(self):
         super().__init__()
-        self.initUI()
-
-    def initUI(self):
-        self.root_stackedwidget = QStackedWidget()
-        self.root_stackedwidget.addWidget(QWidget())
-        self.grid_size = 4
-        self.my_dict = {}
-        page_index = 0
-
-        string1 = "New String 1"
-        string2 = "New String 2"
-        # Insert string1 at position 1
-        self.my_dict[1] = string1
-
-        # Insert string2 at position 3
-        self.my_dict[5] = string2
+        screen = QGuiApplication.primaryScreen()
+        desktop_screen_size = screen.availableGeometry()
 
         layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(layout)
+        self.setFixedSize(632, desktop_screen_size.height() - 30)
+        # sshFile = os.path.join(basedir, "assets/qss", "login_form.qss")
+        self.setStyleSheet(
+            Path("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/qss/login_form.qss").read_text())
 
-        button1 = QPushButton("Next")
-        button1.clicked.connect(self.nextPage)
-        button2 = QPushButton("Previous")
-        button2.clicked.connect(self.previousPage)
-        hBoxLayout = QHBoxLayout()
-        hBoxLayout.addWidget(button1)
-        hBoxLayout.addWidget(button2)
+        self.central_widget = QWidget()
+        self.central_widget.setObjectName("central_widget")
+        self.central_layout = QVBoxLayout()
+        self.central_layout.setContentsMargins(0, 8, 0, 8)
+        self.central_layout.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignHCenter)
+        self.central_widget.setLayout(self.central_layout)
 
-        button3 = QPushButton("2x2")
-        button3.clicked.connect(self.Button3Clicked)
-        layout.addWidget(button3)
+        pixmap = QPixmap("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/logo_login.png")
+        self.label_image = QLabel()
+        self.label_image.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_image.setPixmap(pixmap)
+        self.label_image.resize(pixmap.width(), pixmap.height())
 
-        button5 = QPushButton("3x3")
-        button5.clicked.connect(self.Button5Clicked)
-        layout.addWidget(button5)
+        intro_label = QLabel("Intelligent Video Analystics")
+        intro_label.setStyleSheet('''
+            QLabel
+                {
+                    font-size: 20px;
+                    font-weight: 200;
+                }
+        ''')
+        intro_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        intro_label.setObjectName("intro_label")
 
-        button4 = QPushButton("4x4")
-        button4.clicked.connect(self.Button4Clicked)
-        layout.addWidget(button4)
-        layout.addLayout(hBoxLayout)
+        self.username_edit = QLineEdit()
+        self.username_edit.setFixedSize(360, 34)
+        self.username_edit.setPlaceholderText("Username")
 
-        self.grid = QGridLayout()
-        self.root_stackedwidget.widget(page_index).setLayout(self.grid)
+        self.password_edit = QLineEdit()
+        self.password_edit.setFixedSize(360, 34)
+        self.password_edit.setEchoMode(QLineEdit.EchoMode.Password)
+        self.password_edit.setPlaceholderText("Password")
 
-        layout.addWidget(self.root_stackedwidget)
-        self.labels = []
-        self.setupGridLayout()
+        self.hBoxlayout = QHBoxLayout()
+        self.hBoxlayout.setContentsMargins(0, 0, 0, 0)
+        self.h_widget = QWidget()
+        self.h_widget.setFixedWidth(360)
+        self.h_widget.setLayout(self.hBoxlayout)
+        self.forgot_label = ClickableQLabel("Forgot your password")
+        # self.forgot_label.setStyleSheet('''
+        #     QLabel:hover {
+        #         background-color: #f0f0f0; /* Background color when hovering */
+        #         color: #0000ff; /* Text color when hovering */
+        #         text-decoration: underline; /* Text underline when hovering */
+        #     }
+        # ''')
+        self.sso_label = ClickableQLabel("Sign in with SSO")
+        self.hBoxlayout.addWidget(self.forgot_label)
+        self.hBoxlayout.addStretch()
+        self.hBoxlayout.addWidget(self.sso_label)
 
-    def setupGridLayout(self):
-        for label in self.labels:
-            label.setParent(None)
-        self.labels.clear()
-        for i in range(self.grid_size):
-            row = i // math.sqrt(self.grid_size)
-            col = i % math.sqrt(self.grid_size)
-            label = QLabel(f"Label {row}-{col}")
-            self.labels.append(label)
-            for k, label in enumerate(self.labels):
-                if k in self.my_dict:
-                    label.setText(self.my_dict[k])
-            self.grid.addWidget(label, row, col, Qt.AlignmentFlag.AlignCenter)
+        login_button = QPushButton("LOGIN")
+        login_button.setFixedSize(148, 34)
+        self.central_layout.addStretch(4)
+        self.central_layout.addWidget(self.label_image)
+        self.central_layout.addStretch(1)
+        self.central_layout.addWidget(intro_label)
+        self.central_layout.addStretch(1)
+        self.central_layout.addWidget(self.username_edit)
+        self.central_layout.addWidget(self.password_edit)
+        self.central_layout.addWidget(self.h_widget)
+        self.central_layout.addStretch(1)
+        self.central_layout.addWidget(login_button, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.central_layout.addStretch(4)
 
-    def nextPage(self):
-        if self.root_stackedwidget.count() == 1:
-            return
-        currentIndex = self.root_stackedwidget.currentIndex()
-        nextPageIndex = (currentIndex + 1) % self.root_stackedwidget.count()
-        self.root_stackedwidget.setCurrentIndex(nextPageIndex)
+        layout.addWidget(self.central_widget)
 
-    def previousPage(self):
-        if self.root_stackedwidget.count() == 1:
-            return
-        currentIndex = self.root_stackedwidget.currentIndex()
-        previousPageIndex = (currentIndex - 1) % self.root_stackedwidget.count()
-        self.root_stackedwidget.setCurrentIndex(previousPageIndex)
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
 
-    def Button3Clicked(self):
-        self.grid_size = 4
-        self.grid.setSizeConstraint(QGridLayout.SetFixedSize)
-        self.setupGridLayout()
+        # Draw the background image
+        image = QPixmap("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/frame_login.png")
+        painter.drawPixmap(self.rect(), image)
 
-    def Button5Clicked(self):
-        self.grid_size = 9
-        self.grid.setSizeConstraint(QGridLayout.SetFixedSize)
-        self.setupGridLayout()
+        # Call the base implementation of paintEvent
+        super().paintEvent(event)
 
-    def Button4Clicked(self):
-        self.grid_size = 16
-        self.grid.setSizeConstraint(QGridLayout.SetFixedSize)
-        self.setupGridLayout()
 
-if __name__ == '__main__':
-    app = QApplication([])
-    window = MyWindow()
-    window.show()
-    app.exec()
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("Login Window")
+        screen = QGuiApplication.primaryScreen()
+        desktop_screen_size = screen.availableGeometry()
+
+        primary_screen = QGuiApplication.primaryScreen()
+        available_geometry = primary_screen.availableGeometry()
+        full_geometry = primary_screen.geometry()
+        title_bar_height = full_geometry.height() - available_geometry.height()
+
+        print("Title bar height:", title_bar_height)
+        self.setGeometry(desktop_screen_size)
+
+        layout = QHBoxLayout()
+        self.central_widget = QWidget(self)
+        self.central_widget.setLayout(layout)
+        self.setCentralWidget(self.central_widget)
+
+        # Set the background image
+        self.set_background_image("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/login.png")
+
+        # Create and center the login form widget
+        login_form = LoginForm()
+        # Add spacer item to push login form to the right
+        spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Minimum)
+        layout.addItem(spacer)
+        layout.addWidget(login_form)
+        layout.setContentsMargins(0, 0, 0, 0)
+
+        # Set the background color to black
+        pal = QPalette()
+        pal.setColor(QPalette.Window, Qt.black)
+        self.setPalette(pal)
+
+    def set_background_image(self, image_path):
+        # Apply style sheet to stretch the background image
+        self.setStyleSheet("QMainWindow { background-image: url('" + image_path + "'); "
+                                                                                  "background-repeat: no-repeat; background-position: center center; "
+                                                                                  "background-attachment: fixed; }")
+
+
+app = QApplication(sys.argv)
+window = MainWindow()
+window.show()
+
+# Get the height of the title bar
+frame_height = window.frameSize().height()
+client_height = window.geometry().height()
+title_bar_height = frame_height - client_height
+
+print("Title bar height window :", title_bar_height)
+sys.exit(app.exec())

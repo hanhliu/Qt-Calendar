@@ -33,8 +33,8 @@ class ColorController(QObject):
 
     def handle_widget_clicked(self, widget):
         if self.previous_widget and self.previous_widget != widget:
-            self.previous_widget.label.setStyleSheet(f"background-color: white;")
-        widget.label.setStyleSheet(f"background-color: green;")
+            self.previous_widget.label_image.setStyleSheet(f"background-color: white;")
+        widget.label_image.setStyleSheet(f"background-color: green;")
         self.previous_widget = widget
 
 
