@@ -2,10 +2,11 @@ import sys
 
 import PySide6
 from PySide6.QtCore import Qt, QModelIndex
-from PySide6.QtGui import QAction, QStandardItem, QStandardItemModel, QPainter
+from PySide6.QtGui import QAction, QStandardItem, QStandardItemModel, QPainter, QPixmap
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QMenu, QMainWindow, \
-    QWidgetAction, QListView, QStyledItemDelegate, QStyleOptionViewItem, QStyle, QFrame, QSizePolicy, QScrollArea
+    QWidgetAction, QListView, QStyledItemDelegate, QStyleOptionViewItem, QStyle, QFrame, QSizePolicy, QScrollArea, \
+    QDialog
 
 
 class CustomMenu(QWidget):
@@ -95,27 +96,38 @@ class WarningListView(QListView):
         # Add "Today" and "Older" labels
         self.today_label = ItemDateName("Today")
         self.today_label.setFlags(self.today_label.flags() & ~Qt.ItemIsSelectable)  # Make label unselectable
-
         self.older_label = ItemDateName("Yesterday")
         self.older_label.setFlags(self.older_label.flags() & ~Qt.ItemIsSelectable)
 
-        # Add sample notifications
-        today_items = ["Notification 1", "Notification 2"]
-        older_items = ["Notification 3", "Notification 4", "Notification 5"]
+        # Create and append ItemNotification instances to the list
+        for i in range(5):  # Create 5 items as an example; you can adjust the range as needed
+            item = ItemNotification()
+            self.list_alert_today.append(item)
+
         self.today_index = self.list_view_model.rowCount()
+        self.label_no_warning_today = QStandardItem("No warnings")
+        self.label_no_warning_today.setFlags(self.label_no_warning_today.flags() & ~Qt.ItemIsSelectable)  # Make label unselectable
+        self.label_no_warning = QStandardItem("No warnings")
+        self.label_no_warning.setFlags(self.label_no_warning.flags() & ~Qt.ItemIsSelectable)  # Make label unselectable
 
         # Add labels and items to the model
         self.list_view_model.appendRow(self.today_label)
         self.setIndexWidget(self.list_view_model.indexFromItem(self.today_label), self.today_label.main_widget)
-        self.add_items_to_list(today_items)
+        if self.list_alert_today:
+            self.add_items_to_list(self.list_alert_today)
+        else:
+            self.list_view_model.appendRow(self.label_no_warning_today)
         self.list_view_model.appendRow(self.older_label)
         self.setIndexWidget(self.list_view_model.indexFromItem(self.older_label), self.older_label.main_widget)
-        self.add_items_to_list(older_items)
+        if self.list_alert_older:
+            self.add_items_to_list(self.list_alert_older)
+        else:
+            self.list_view_model.appendRow(self.label_no_warning)
 
     def add_items_to_list(self, list_items):
         for item_text in list_items:
-            item = QStandardItem(item_text)
-            self.list_view_model.appendRow(item)
+            self.list_view_model.appendRow(item_text)
+            self.setIndexWidget(self.list_view_model.indexFromItem(item_text), item_text.main_widget)
 
     def add_to_list_today(self):
         if self.today_index is not None:
@@ -124,6 +136,7 @@ class WarningListView(QListView):
             self.list_view_model.insertRow(self.today_index + 1, item_widget)
             self.setIndexWidget(self.list_view_model.indexFromItem(item_widget), item_widget.main_widget)
             self.today_index += 1
+        self.label_no_warning_today.setData("", Qt.DisplayRole)
 
     def add_to_list_older(self):
         self.older_index = self.list_view_model.indexFromItem(self.older_label).row()
@@ -133,6 +146,8 @@ class WarningListView(QListView):
             self.list_view_model.insertRow(self.older_index + 1, item)
             self.setIndexWidget(self.list_view_model.indexFromItem(item), item.main_widget)
             self.older_index += 1
+
+        self.label_no_warning.setData("", Qt.DisplayRole)
 
 class ItemDateName(QStandardItem):
     def __init__(self, title):
@@ -183,11 +198,12 @@ class ItemNotification(QStandardItem):
 
         self.layout_image_event = QVBoxLayout()
         self.layout_image_event.setContentsMargins(0, 0, 0, 0)
-        svg_image_event = QSvgWidget()
-        svg_image_event.load("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/state_read.svg")
-        svg_image_event.setFixedSize(60, 60)
+        # Load an image using QPixmap
+        self.image_label = QLabel()
+        pixmap = QPixmap("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/image_event.png")  # Replace with the actual image file path
+        self.image_label.setPixmap(pixmap)
         self.label_time = QLabel("10:10:10")
-        self.layout_image_event.addWidget(svg_image_event)
+        self.layout_image_event.addWidget(self.image_label)
         self.layout_image_event.addWidget(self.label_time)
 
         self.layout_content_event = QVBoxLayout()
@@ -212,6 +228,14 @@ class ItemNotification(QStandardItem):
         self.setSizeHint(self.main_widget.sizeHint())
         self.setData(self.main_widget, Qt.UserRole)
 
+        # create listen click to item
+        self.main_widget.mousePressEvent = self.on_item_click
+
+    def on_item_click(self, event):
+        if event.button() == Qt.LeftButton:
+            # show dialog
+            self.dialog = QDialog()
+            self.dialog.exec()
 
 class ButtonFilterNotification(QPushButton):
     def __init__(self, title=None, type_button=None, click=None):

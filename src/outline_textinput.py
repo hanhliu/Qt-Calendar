@@ -1,69 +1,64 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget
-from PySide6.QtCore import Qt, QTimer
 
-class Toast(QWidget):
-    def __init__(self, message, timeout=3000):
-        super().__init__()
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QMenu, QListView, QDialog, QVBoxLayout, QListWidget, \
+    QListWidgetItem, QAction
 
-        self.message = message
-        self.timeout = timeout
 
-        self.label = QPushButton(self.message)
-        self.label.setFlat(True)
-        self.label.clicked.connect(self.hide)
+class CustomMenu(QMenu):
+    showDialogSignal = pyqtSignal()
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.initUI()
 
+    def initUI(self):
+        action = QAction("Action 1", self)
+        action.triggered.connect(self.showDialogSignal.emit)
+        self.addAction(action)
+
+    def mouseReleaseEvent(self, event):
+        action = self.activeAction()
+        if action:
+            if isinstance(action.parent(), QListWidget):
+                self.showDialog()
+                return
+
+        super().mouseReleaseEvent(event)
+
+    def showDialog(self):
+        dialog = QDialog(self.parentWidget())
         layout = QVBoxLayout()
-        layout.addWidget(self.label)
-        self.setLayout(layout)
+        list_widget = QListWidget(dialog)
+        for i in range(5):
+            item = QListWidgetItem(f"Item {i + 1}")
+            list_widget.addItem(item)
+        list_widget.itemClicked.connect(dialog.accept)
+        layout.addWidget(list_widget)
+        dialog.setLayout(layout)
+        dialog.exec_()
 
-        self.setStyleSheet(
-            "background-color: rgba(50, 50, 50, 180); color: white; border-radius: 5px; padding: 10px;"
-        )
-
-        self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setGeometry(0, 0, 0, 0)
-
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.hide)
-        self.timer.start(self.timeout)
-
-    def show(self):
-        super().show()
-        self.setWindowOpacity(0.7)
-
-    def hide(self):
-        self.timer.stop()
-        self.setWindowOpacity(0)
-        self.deleteLater()
-
-class MainWindow(QMainWindow):
+class MyWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.initUI()
 
-        self.setWindowTitle("Toast Example")
+    def initUI(self):
+        self.setGeometry(100, 100, 400, 300)
+        self.setWindowTitle('Menu and Dialog Example')
 
-        layout = QVBoxLayout()
-        self.button = QPushButton("Show Toast")
-        self.button.clicked.connect(self.show_toast)
-        layout.addWidget(self.button)
+        self.central_widget = QPushButton('Show Menu', self)
+        self.central_widget.setGeometry(100, 100, 150, 30)
 
-        self.central_widget = QWidget()
-        self.central_widget.setLayout(layout)
-        self.setCentralWidget(self.central_widget)
+        self.central_widget.clicked.connect(self.showContextMenu)
 
-    def show_toast(self):
-        toast = Toast("Hello, this is a toast notification!", timeout=3000)
-        toast.setGeometry(
-            1920 / 2 - toast.width() / 2,
-            1080 / 2 - toast.height() / 2,
-            toast.width(),
-            toast.height(),
-        )
-        toast.show()
+    def showContextMenu(self):
+        menu = CustomMenu(self)
+        menu.showDialogSignal.connect(menu.showDialog)  # Connect the signal to the showDialog method
+        menu.popup(self.central_widget.mapToGlobal(self.central_widget.rect().bottomLeft()))
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = MainWindow()
+    window = MyWindow()
     window.show()
-    sys.exit(app.exec())
+    sys.exit(app.exec_())
