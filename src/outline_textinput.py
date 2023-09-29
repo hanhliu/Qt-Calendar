@@ -1,64 +1,34 @@
-import sys
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QMenu, QAction, QDialog, QLabel
 
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QMenu, QListView, QDialog, QVBoxLayout, QListWidget, \
-    QListWidgetItem, QAction
-
-
-class CustomMenu(QMenu):
-    showDialogSignal = pyqtSignal()
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.initUI()
-
-    def initUI(self):
-        action = QAction("Action 1", self)
-        action.triggered.connect(self.showDialogSignal.emit)
-        self.addAction(action)
-
-    def mouseReleaseEvent(self, event):
-        action = self.activeAction()
-        if action:
-            if isinstance(action.parent(), QListWidget):
-                self.showDialog()
-                return
-
-        super().mouseReleaseEvent(event)
-
-    def showDialog(self):
-        dialog = QDialog(self.parentWidget())
-        layout = QVBoxLayout()
-        list_widget = QListWidget(dialog)
-        for i in range(5):
-            item = QListWidgetItem(f"Item {i + 1}")
-            list_widget.addItem(item)
-        list_widget.itemClicked.connect(dialog.accept)
-        layout.addWidget(list_widget)
-        dialog.setLayout(layout)
-        dialog.exec_()
-
-class MyWindow(QMainWindow):
+class MyApplication(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.initUI()
+        self.setWindowTitle("My Application")
+        self.button = QPushButton("Show Menu", self)
+        self.button.clicked.connect(self.show_menu)
+        self.setCentralWidget(self.button)
+        self.menu = None  # Track the menu
 
-    def initUI(self):
-        self.setGeometry(100, 100, 400, 300)
-        self.setWindowTitle('Menu and Dialog Example')
+    def show_menu(self):
+        if self.menu is None:
+            self.menu = QMenu(self)
+            action1 = QAction("Option 1", self)
+            action2 = QAction("Option 2", self)
+            self.menu.addAction(action1)
+            self.menu.addAction(action2)
+            action1.triggered.connect(lambda: self.show_dialog(1))
+            action2.triggered.connect(lambda: self.show_dialog(2))
+        self.menu.exec_(self.button.mapToGlobal(self.button.rect().bottomLeft()))
 
-        self.central_widget = QPushButton('Show Menu', self)
-        self.central_widget.setGeometry(100, 100, 150, 30)
-
-        self.central_widget.clicked.connect(self.showContextMenu)
-
-    def showContextMenu(self):
-        menu = CustomMenu(self)
-        menu.showDialogSignal.connect(menu.showDialog)  # Connect the signal to the showDialog method
-        menu.popup(self.central_widget.mapToGlobal(self.central_widget.rect().bottomLeft()))
+    def show_dialog(self, option):
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"Option {option} Dialog")
+        label = QLabel(f"Option {option} selected!", dialog)
+        dialog.exec_()
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = MyWindow()
+    app = QApplication([])
+    window = MyApplication()
     window.show()
-    sys.exit(app.exec_())
+    app.exec_()

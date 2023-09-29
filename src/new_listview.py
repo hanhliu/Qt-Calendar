@@ -181,14 +181,14 @@ class ItemDateName(QStandardItem):
 
 
 class ItemNotification(QStandardItem):
-    def __init__(self):
+    def __init__(self,):
         super().__init__()
         self.load_ui()
 
     def load_ui(self):
         self.main_widget = QWidget()
         self.main_layout = QHBoxLayout(self.main_widget)
-
+        self.main_layout.setSpacing(2)
         # self.widget_state_read = QWidget()
         self.layout_state_read = QVBoxLayout()
         svg_state_read = QSvgWidget()
@@ -198,25 +198,33 @@ class ItemNotification(QStandardItem):
 
         self.layout_image_event = QVBoxLayout()
         self.layout_image_event.setContentsMargins(0, 0, 0, 0)
+        self.layout_image_event.setSpacing(0)
+        self.layout_image_event.setAlignment(Qt.AlignmentFlag.AlignCenter)
         # Load an image using QPixmap
         self.image_label = QLabel()
         pixmap = QPixmap("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/image_event.png")  # Replace with the actual image file path
         self.image_label.setPixmap(pixmap)
         self.label_time = QLabel("10:10:10")
+        self.label_time.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout_image_event.addWidget(self.image_label)
         self.layout_image_event.addWidget(self.label_time)
 
         self.layout_content_event = QVBoxLayout()
         self.layout_content_event.setContentsMargins(0, 0, 0, 0)
+        self.layout_content_event.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.layout_title = QHBoxLayout()
         self.layout_title.setContentsMargins(0, 0, 0, 0)
+        self.layout_title.setSpacing(5)
         self.object_name = QLabel("Alex Hoang")
-        self.label_blacklist = QPushButton("Blacklist")
+        self.object_name.setStyleSheet("font-weight: bold")
+        self.label_blacklist = QLabel("Blacklist")
+        self.label_blacklist.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.label_blacklist.setFixedHeight(28)
+        self.label_blacklist.setStyleSheet("color: white; background-color: red; border-radius: 4px")
         self.layout_title.addWidget(self.object_name)
         self.layout_title.addWidget(self.label_blacklist)
         self.label_warning_context = QLabel("Warning Context: Frequency")
         self.label_method = QLabel("Appear 5 times within 1 hour")
-        self.label_method.setStyleSheet("background-color: yellow; color: black")
         self.layout_content_event.addLayout(self.layout_title)
         self.layout_content_event.addWidget(self.label_warning_context)
         self.layout_content_event.addWidget(self.label_method)
@@ -233,9 +241,13 @@ class ItemNotification(QStandardItem):
 
     def on_item_click(self, event):
         if event.button() == Qt.LeftButton:
-            # show dialog
-            self.dialog = QDialog()
-            self.dialog.exec()
+            print("HanhLT: click to item")
+            # self.dialog = QDialog()
+            # self.dialog.setEnabled(False)
+            # self.dialog.repaint()
+            # self.dialog.setEnabled(True)
+            # self.dialog.setWindowFlag(Qt.WindowStaysOnTopHint)
+            # self.dialog.exec()
 
 class ButtonFilterNotification(QPushButton):
     def __init__(self, title=None, type_button=None, click=None):
