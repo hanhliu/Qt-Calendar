@@ -1,178 +1,116 @@
-import sys, os
-from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QVBoxLayout, QLabel, QLineEdit, QPushButton, \
-    QHBoxLayout, QSpacerItem, QSizePolicy
-from PySide6.QtGui import QPixmap, QPalette, QGuiApplication, QColor, QPainter, QFont
-from PySide6.QtCore import Qt
+import os
+import sys
 
-from pathlib import Path
+from PySide6.QtCore import QItemSelection, QItemSelectionModel, Signal
+from PySide6.QtGui import QStandardItemModel, QStandardItem
+from PySide6.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout, QTreeView, \
+    QAbstractItemView, QPushButton
 
-basedir = os.path.dirname(__file__)
-
-
-class ClickableQLabel(QLabel):
-    def __init__(self, title):
-        super().__init__()
-        self.title = title
-        self.setText(self.title)
-
-    def enterEvent(self, event):
-        f = QFont()
-        f.setUnderline(True)
-        self.setFont(f)
-
-    def leaveEvent(self, event):
-        f = QFont()
-        f.setUnderline(False)
-        self.setFont(f)
-
-    def mousePressEvent(self, ev):
-        print("HanhLT: mouse press click ")
-
-
-class LoginForm(QWidget):
-    def __init__(self):
-        super().__init__()
-        screen = QGuiApplication.primaryScreen()
-        desktop_screen_size = screen.availableGeometry()
-
-        layout = QVBoxLayout()
-        layout.setContentsMargins(0, 0, 0, 0)
-        self.setLayout(layout)
-        self.setFixedSize(632, desktop_screen_size.height() - 30)
-        # sshFile = os.path.join(basedir, "assets/qss", "login_form.qss")
-        self.setStyleSheet(
-            Path("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/qss/login_form.qss").read_text())
-
-        self.central_widget = QWidget()
-        self.central_widget.setObjectName("central_widget")
-        self.central_layout = QVBoxLayout()
-        self.central_layout.setContentsMargins(0, 8, 0, 8)
-        self.central_layout.setAlignment(Qt.AlignmentFlag.AlignCenter | Qt.AlignmentFlag.AlignHCenter)
-        self.central_widget.setLayout(self.central_layout)
-
-        pixmap = QPixmap("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/logo_login.png")
-        self.label_image = QLabel()
-        self.label_image.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.label_image.setPixmap(pixmap)
-        self.label_image.resize(pixmap.width(), pixmap.height())
-
-        intro_label = QLabel("Intelligent Video Analystics")
-        intro_label.setStyleSheet('''
-            QLabel
-                {
-                    font-size: 20px;
-                    font-weight: 200;
-                }
-        ''')
-        intro_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        intro_label.setObjectName("intro_label")
-
-        self.username_edit = QLineEdit()
-        self.username_edit.setFixedSize(360, 34)
-        self.username_edit.setPlaceholderText("Username")
-
-        self.password_edit = QLineEdit()
-        self.password_edit.setFixedSize(360, 34)
-        self.password_edit.setEchoMode(QLineEdit.EchoMode.Password)
-        self.password_edit.setPlaceholderText("Password")
-
-        self.hBoxlayout = QHBoxLayout()
-        self.hBoxlayout.setContentsMargins(0, 0, 0, 0)
-        self.h_widget = QWidget()
-        self.h_widget.setFixedWidth(360)
-        self.h_widget.setLayout(self.hBoxlayout)
-        self.forgot_label = ClickableQLabel("Forgot your password")
-        # self.forgot_label.setStyleSheet('''
-        #     QLabel:hover {
-        #         background-color: #f0f0f0; /* Background color when hovering */
-        #         color: #0000ff; /* Text color when hovering */
-        #         text-decoration: underline; /* Text underline when hovering */
-        #     }
-        # ''')
-        self.sso_label = ClickableQLabel("Sign in with SSO")
-        self.hBoxlayout.addWidget(self.forgot_label)
-        self.hBoxlayout.addStretch()
-        self.hBoxlayout.addWidget(self.sso_label)
-
-        login_button = QPushButton("LOGIN")
-        login_button.setFixedSize(148, 34)
-        self.central_layout.addStretch(4)
-        self.central_layout.addWidget(self.label_image)
-        self.central_layout.addStretch(1)
-        self.central_layout.addWidget(intro_label)
-        self.central_layout.addStretch(1)
-        self.central_layout.addWidget(self.username_edit)
-        self.central_layout.addWidget(self.password_edit)
-        self.central_layout.addWidget(self.h_widget)
-        self.central_layout.addStretch(1)
-        self.central_layout.addWidget(login_button, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.central_layout.addStretch(4)
-
-        layout.addWidget(self.central_widget)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.Antialiasing)
-
-        # Draw the background image
-        image = QPixmap("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/frame_login.png")
-        painter.drawPixmap(self.rect(), image)
-
-        # Call the base implementation of paintEvent
-        super().paintEvent(event)
-
+# # Get the index of item 3
+# index = model.index(2, 0)
+#
+# # Create a selection model and set the current index to item 3
+# selection_model = self.tree_view.selectionModel()
+# selection = QItemSelection(index, index)
+# selection_model.select(selection, QItemSelectionModel.Select)
 
 class MainWindow(QMainWindow):
+    temp_signal = Signal(str)
     def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Login Window")
-        screen = QGuiApplication.primaryScreen()
-        desktop_screen_size = screen.availableGeometry()
+        QMainWindow.__init__(self)
+        self.load_ui()
 
-        primary_screen = QGuiApplication.primaryScreen()
-        available_geometry = primary_screen.availableGeometry()
-        full_geometry = primary_screen.geometry()
-        title_bar_height = full_geometry.height() - available_geometry.height()
+    def load_ui(self):
+        self.central_widget = QWidget()
+        self.central_layout = QVBoxLayout()
 
-        print("Title bar height:", title_bar_height)
-        self.setGeometry(desktop_screen_size)
+        self.tree_view = QTreeView()
+        model = QStandardItemModel()
 
-        layout = QHBoxLayout()
-        self.central_widget = QWidget(self)
-        self.central_widget.setLayout(layout)
+        root_item = model.invisibleRootItem()
+        # Create child items
+        child_item1 = QStandardItem("Child 1")
+        child_item2 = QStandardItem("Child 2")
+        root_item.appendRow(child_item1)
+        root_item.appendRow(child_item2)
+
+        # Create a subchild item
+        subchild_item = QStandardItem("Subchild")
+        child_item1.appendRow(subchild_item)
+
+        # Create sub-subchild items
+        sub_subchild_item1 = QStandardItem("Subchild 1")
+        sub_subchild_item2 = QStandardItem("Subchild 2")
+        sub_subchild_item3 = QStandardItem("Subchild 3")
+        sub_subchild_item4 = QStandardItem("Subchild 4")
+        subchild_item.appendRow(sub_subchild_item1)
+        subchild_item.appendRow(sub_subchild_item2)
+        subchild_item.appendRow(sub_subchild_item3)
+        subchild_item.appendRow(sub_subchild_item4)
+
+        self.tree_view.setModel(model)
+        self.tree_view.setSelectionMode(QTreeView.SelectionMode.SingleSelection)
+
+        self.temp_signal.connect(self.highlight_item)
+
+        self.central_layout.addWidget(self.tree_view)
+        self.button = QPushButton("Button")
+        self.button.clicked.connect(self.click_button)
+        self.central_layout.addWidget(self.button)
+
+        self.button_h = QPushButton("button2")
+        self.central_layout.addWidget(self.button_h)
+        self.central_widget.setLayout(self.central_layout)
         self.setCentralWidget(self.central_widget)
 
-        # Set the background image
-        self.set_background_image("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/login.png")
+    # def highlight_item(self, data):
+    #     self.tree_view.clearSelection()
+    #     print("HanhLT: data ", data)
+    #     model = self.tree_view.model()
+    #     for row in range(model.rowCount()):
+    #         item = model.item(row)
+    #         if item.text() == data:
+    #             index = model.indexFromItem(item)
+    #             selection_model = self.tree_view.selectionModel()
+    #             selection = QItemSelection(index, index)
+    #             selection_model.select(selection, QItemSelectionModel.ClearAndSelect)
 
-        # Create and center the login form widget
-        login_form = LoginForm()
-        # Add spacer item to push login form to the right
-        spacer = QSpacerItem(0, 0, QSizePolicy.Expanding, QSizePolicy.Minimum)
-        layout.addItem(spacer)
-        layout.addWidget(login_form)
-        layout.setContentsMargins(0, 0, 0, 0)
+    def highlight_item(self, data):
+        self.tree_view.clearSelection()
+        print("HanhLT: data ", data)
 
-        # Set the background color to black
-        pal = QPalette()
-        pal.setColor(QPalette.Window, Qt.black)
-        self.setPalette(pal)
+        # Find the item in the model
+        item = self.find_item_by_text(self.tree_view.model().invisibleRootItem(), data)
 
-    def set_background_image(self, image_path):
-        # Apply style sheet to stretch the background image
-        self.setStyleSheet("QMainWindow { background-image: url('" + image_path + "'); "
-                                                                                  "background-repeat: no-repeat; background-position: center center; "
-                                                                                  "background-attachment: fixed; }")
+        if item is not None:
+            # Select the item and its descendants
+            index = self.tree_view.model().indexFromItem(item)
+            selection_model = self.tree_view.selectionModel()
+            selection = QItemSelection(index, index)
+            selection_model.select(selection, QItemSelectionModel.ClearAndSelect)
+        else:
+            print(f"Item with text '{data}' not found.")
+
+    def find_item_by_text(self, parent_item, target_text):
+        # Recursive function to find an item by text
+        for row in range(parent_item.rowCount()):
+            item = parent_item.child(row)
+            if item.text() == target_text:
+                return item
+            # Recursively search in child items
+            found_item = self.find_item_by_text(item, target_text)
+            if found_item is not None:
+                return found_item
+
+        return None
+
+    def click_button(self):
+
+        self.temp_signal.emit("Subchild 1")
 
 
-app = QApplication(sys.argv)
-window = MainWindow()
-window.show()
-
-# Get the height of the title bar
-frame_height = window.frameSize().height()
-client_height = window.geometry().height()
-title_bar_height = frame_height - client_height
-
-print("Title bar height window :", title_bar_height)
-sys.exit(app.exec())
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec())

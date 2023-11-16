@@ -1,398 +1,235 @@
 import sys
+
+import PySide6
 from PySide6.QtCore import QDate, QLocale, Qt, QTime, QDateTime
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QCalendarWidget, \
-    QDateTimeEdit
-from PySide6.QtGui import QTextCharFormat, QPalette
+    QDateTimeEdit, QComboBox, QItemDelegate
+from PySide6.QtGui import QTextCharFormat, QPalette, QStandardItemModel, QStandardItem
 
 month_names = {
-    "Jan": 1,
-    "Feb": 2,
-    "Mar": 3,
-    "Apr": 4,
+    "January": 1,
+    "February": 2,
+    "March": 3,
+    "April": 4,
     "May": 5,
-    "Jun": 6,
-    "Jul": 7,
-    "Aug": 8,
-    "Sep": 9,
-    "Oct": 10,
-    "Nov": 11,
-    "Dec": 12
+    "June": 6,
+    "July": 7,
+    "August": 8,
+    "September": 9,
+    "October": 10,
+    "November": 11,
+    "December": 12
 }
 
+class ComboBoxUnit(QWidget):
+    def __init__(self, list_input=None, type_combo=None):
+        super().__init__()
+        self.list_input = list_input
+        self.type_combo = type_combo
+        self.initUI()
+
+    def initUI(self):
+        # Create a QComboBox widget
+        self.combo_box = QComboBox(self)
+
+        # Create a QStandardItemModel
+        model = QStandardItemModel()
+        if self.list_input:
+            for item in self.list_input:
+                item_child = QStandardItem(item)
+                model.appendRow(item_child)
+
+        # Set the model for the ComboBox
+        self.combo_box.setModel(model)
+
+        if self.type_combo == "months":
+            current_month = QDate.currentDate().month()
+            self.combo_box.setCurrentIndex(current_month - 1)
+        else:
+            pass
+
+        # Create a delegate to display icons and text
+        delegate = QItemDelegate(self.combo_box)
+        self.combo_box.setItemDelegate(delegate)
+
+        # Set a style sheet for the ComboBox
+        self.combo_box.setStyleSheet(f'''
+            QComboBox {{ 
+                background-color: white; 
+                border: 1px solid #BBBBBB; border-radius: 2px;
+            }}
+            QComboBox::drop-down {{
+                 background-color: white;
+             }}
+            
+        ''')
+
+        # Connect the ComboBox to a function that handles item selection
+        # self.combo_box.activated.connect(self.comboBoxItemSelected)
+        self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(0, 0, 0, 0)
+        self.layout.addWidget(self.combo_box)
+        self.setLayout(self.layout)
+
+    def comboBoxItemSelected(self, index):
+        # Get the selected item text
+        selected_item = self.sender().currentText()
+
+class CustomCalendar(QCalendarWidget):
+    def __init__(self):
+        super().__init__()
+
+    def wheelEvent(self, event: PySide6.QtGui.QWheelEvent) -> None:
+        event.ignore()
 
 class MonthViewer(QWidget):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Month Viewer")
-        self.__highlight_format = QTextCharFormat()
-        self.__highlight_format.setBackground(self.palette().brush(QPalette.Highlight))
-        self.__highlight_format.setForeground(self.palette().color(QPalette.HighlightedText))
+        self.highlight_format = QTextCharFormat()
+        self.highlight_format.setBackground(self.palette().brush(QPalette.Highlight))
+        self.highlight_format.setForeground(self.palette().color(QPalette.HighlightedText))
 
-        self.__current_week = QDate.currentDate().weekNumber()
-        self.__current_month = QDate.currentDate().month()
-        self.__current_year = QDate.currentDate().year()
-        self.__sYear = QDate.currentDate().year()
-        self.__sMonth = QDate.currentDate().toString("MM")
-        self.__sDate = QDate.currentDate().day()
-        self.__sDateFinal = QDate().currentDate()  # this final date to use
-        self.__calendar = QCalendarWidget()
-        self.__calendar.setCurrentPage(QDate.currentDate().year(), QDate.currentDate().month())
-        self.__calendar.setSelectedDate(QDate.currentDate())
-        self.__calendar.setStyleSheet('''
-            QCalendarWidget QTableView {
-                selection-color: black;
-                selection-background-color: #A4D8FD;
-                background-color: white;
-            }
-            QCalendarWidget QAbstractItemView:enabled{
-                background-color: white;
-                color: black;
-            }
+        self.current_week = QDate.currentDate().weekNumber()
+        self.current_month = QDate.currentDate().month()
+        self.current_year = QDate.currentDate().year()
+        self.sYear = QDate.currentDate().year()
+        self.sMonth = QDate.currentDate().toString("MMMM")
+        self.sDate = QDate.currentDate().day()
+        self.sDateFinal = QDate().currentDate()  # this final date to use
 
-            QCalendarWidget QWidget{
-                background-color:white;
-                color: grey;
-                border: 1px solid gray;
-            }  
-            ''')
-
-        # Variable to keep track of the previously clicked label
-        self.__previous_year_label = None
-        self.__previous_month_label = None
-        self.__label_year_pick = None
-        self.__label_month_pick = None
-
-        self.__begin_date = QDate().currentDate()
-        self.__end_date = QDate().currentDate()
+        self.begin_date = QDate().currentDate()
+        self.end_date = QDate().currentDate()
         self.start_value = QDateTime()
         self.end_value = QDateTime()
         self.end_time = QTime(23, 59, 00)
         self.start_time = QTime(00, 00, 00)
-        self.__month_labels = []
-        self.__year_labels = []
+        self.month_labels = []
+        self.year_labels = []
         self.setup_ui()
 
     def setup_ui(self):
-        self.__label_year_pick = str(self.__sYear)
-        self.__label_month_pick = self.__sMonth
-        # Create layout for the month labels
-        months_layout = QHBoxLayout()
-        # Create layout for the navigation buttons
-        month_buttons_layout = QHBoxLayout()
-        # Create the navigation buttons
-        month_prev_button = QPushButton("<")
-        month_prev_button.clicked.connect(self.__previous_months)
-        month_prev_button.setFixedSize(24, 24)
-        month_next_button = QPushButton(">")
-        month_next_button.clicked.connect(self.__next_months)
-        month_next_button.setFixedSize(24, 24)
-        # Create the month labels
-        for i in range(3):
-            self.__month_label = QLabel()
-            self.__month_label.setAlignment(Qt.AlignCenter)
-            self.__month_labels.append(self.__month_label)
-            months_layout.addWidget(self.__month_label)
-            self.__update_month_label(i)
-
-        # Add the navigation buttons to the buttons layout
-        month_buttons_layout.addWidget(month_prev_button)
-        month_buttons_layout.addLayout(months_layout)
-        month_buttons_layout.addWidget(month_next_button)
-        months_widget = QWidget()
-        months_widget.setLayout(month_buttons_layout)
-        months_widget.setObjectName("month_parentWidget")
-        months_widget.setStyleSheet('''
-                    QWidget#month_parentWidget {
-                        background-color: white;
-                        border: 1px solid gray;
-                    }
-
-                    QWidget#month_parentWidget QPushButton {
-                        background-color: white;
-                        color: gray;
-                        border-radius: 5px;
-                        border: 1px solid gray;
-                        padding: 5px 5px;
-                    }
-
-                    QWidget#month_parentWidget QPushButton:hover {
-                        background-color: #A4D8FD;
-                    }
-
-                ''')
-
-        # year UI
-        year_prev_button = QPushButton("<")
-        year_prev_button.clicked.connect(self.__previous_years)
-        year_prev_button.setFixedSize(24, 24)
-        year_next_button = QPushButton(">")
-        year_next_button.clicked.connect(self.__next_years)
-        year_next_button.setFixedSize(24, 24)
-        year_layout = QHBoxLayout()
-        year_button_layout = QHBoxLayout()
-        year_widget = QWidget()
-        for i in range(3):
-            self.__year_label = QLabel()
-            self.__year_label.setAlignment(Qt.AlignCenter)
-            self.__year_labels.append(self.__year_label)
-            year_layout.addWidget(self.__year_label)
-            self.__update_year_label(i)
-        year_button_layout.addWidget(year_prev_button)
-        year_button_layout.addLayout(year_layout)
-        year_button_layout.addWidget(year_next_button)
-        year_widget.setLayout(year_button_layout)
-        year_widget.setObjectName("year_parentWidget")
-        year_widget.setStyleSheet('''
-            QWidget#year_parentWidget {
-                background-color: white;
-                border: 1px solid gray;
-            }
-            QWidget#year_parentWidget QPushButton {
-                background-color: white;
-                color: gray;
-                border-radius: 5px;
-                border: 1px solid gray;
-                padding: 5px 5px;
-            }
-            QWidget#year_parentWidget QPushButton:hover {
-                background-color: #A4D8FD;
-            }
-        ''')
+        months = ["January", "February", "March", "April", "May", "June",
+                  "July", "August", "September", "October", "November", "December"]
+        self.combobox_month = ComboBoxUnit(list_input=months, type_combo='months')
+        self.combobox_month.combo_box.activated.connect(self.on_combo_month_activated)
+        current_year = QDate.currentDate().year()
+        years = [str(current_year - i) for i in range(5)]
+        self.combobox_year = ComboBoxUnit(list_input=years, type_combo='years')
+        self.combobox_year.combo_box.activated.connect(self.on_combo_year_activated)
 
         # QCalendar
-        self.__calendar.setNavigationBarVisible(False)
-        self.__calendar.setVerticalHeaderFormat(QCalendarWidget.VerticalHeaderFormat.NoVerticalHeader)
-        self.__calendar.installEventFilter(self)
-        self.__calendar.clicked.connect(self.__date_is_clicked)
-        self.__calendar.setToolTip("Giữ phím Shift để chọn khoảng thời gian")
+        self.calendar = CustomCalendar()
+        self.calendar.setCurrentPage(QDate.currentDate().year(), QDate.currentDate().month())
+        self.calendar.setSelectedDate(QDate.currentDate())
+        self.calendar.setStyleSheet('''
+                    QCalendarWidget QTableView {
+                        selection-color: black;
+                        selection-background-color: #A4D8FD;
+                        background-color: white;
+                    }
+                    QCalendarWidget QAbstractItemView:enabled{
+                        background-color: white;
+                        color: black;
+                    }
 
-        self.__time_picker = TimePickerWidget()
+                    QCalendarWidget QWidget{
+                        background-color:white;
+                        color: grey;
+                        border: 1px solid gray;
+                    }  
+                    ''')
+        self.calendar.setNavigationBarVisible(False)
+        self.calendar.setVerticalHeaderFormat(QCalendarWidget.VerticalHeaderFormat.NoVerticalHeader)
+        self.calendar.installEventFilter(self)
+        self.calendar.clicked.connect(self.date_is_clicked)
+        self.calendar.setToolTip("Giữ phím Shift để chọn khoảng thời gian")
 
+        self.time_picker = TimePickerWidget()
+
+        self.month_year_layout = QHBoxLayout()
+        self.month_year_layout.addWidget(self.combobox_month)
+        self.month_year_layout.addWidget(self.combobox_year)
         # Create the main layout and add the sub-layouts to it
         main_layout = QVBoxLayout()
-        main_layout.addWidget(year_widget)
-        main_layout.addWidget(months_widget)
-        main_layout.addWidget(self.__calendar)
-        main_layout.addWidget(self.__time_picker)
+        main_layout.addLayout(self.month_year_layout)
+        main_layout.addWidget(self.calendar)
+        main_layout.addWidget(self.time_picker)
         main_layout.setContentsMargins(0, 0, 0, 0)
 
         # Set the main layout for the widget
         self.setLayout(main_layout)
+    def on_combo_month_activated(self):
+        selected_month = self.combobox_month.combo_box.currentText()
 
-    def getStartDate(self):
-        return self.__begin_date
+        self.sMonth = selected_month
+        self.sDateFinal = QDate(self.sYear, month_names[self.sMonth], self.sDate)
+        self.calendar.setSelectedDate(QDate(self.sYear, month_names[self.sMonth], self.sDate))
+    def on_combo_year_activated(self):
+        selected_year = self.combobox_year.combo_box.currentText()
+        self.sYear = int(selected_year)
+        self.sDateFinal = QDate(self.sYear, month_names[self.sMonth], self.sDate)
+        self.calendar.setSelectedDate(QDate(self.sYear, month_names[self.sMonth], self.sDate))
 
-    def getEndDate(self):
-        return self.__end_date
-
-    def setStartDate(self, date):
-        self.__begin_date = date
-        return self.__begin_date
-
-    def setEndDate(self, date):
-        self.__end_date = date
-        return self.__end_date
-
-    def getStartTime(self):
-        self.start_time = self.__time_picker.start_time_value
-        return self.start_time
-
-    def getEndTime(self):
-        self.end_time = self.__time_picker.end_time_value
-        return self.end_time
-
-    def __format_range(self, format):
-        if self.__begin_date and self.__end_date:
-            d0 = min(self.__begin_date, self.__end_date)
-            d1 = max(self.__begin_date, self.__end_date)
+    def format_range(self, format):
+        if self.begin_date and self.end_date:
+            d0 = min(self.begin_date, self.end_date)
+            d1 = max(self.begin_date, self.end_date)
             while d0 <= d1:
-                self.__calendar.setDateTextFormat(d0, format)
+                self.calendar.setDateTextFormat(d0, format)
                 d0 = d0.addDays(1)
 
-    def __date_is_clicked(self, date):
+    def date_is_clicked(self, date):
         # reset highlighting of previously selected date range
-        self.__format_range(QTextCharFormat())
-        if QApplication.instance().keyboardModifiers() & Qt.ShiftModifier and self.__begin_date:
-            self.start_value = QDateTime(self.__begin_date, self.__time_picker.start_time_value)
-            self.end_value = QDateTime(self.__end_date, self.__time_picker.end_time_value)
-            print("HanhLT: beginn   ", self.__begin_date, "      end ", self.__end_date)
-            if self.__begin_date < date:
+        self.format_range(QTextCharFormat())
+        if QApplication.instance().keyboardModifiers() & Qt.ShiftModifier and self.begin_date:
+            self.start_value = QDateTime(self.begin_date, self.time_picker.start_time_value)
+            self.end_value = QDateTime(self.end_date, self.time_picker.end_time_value)
+            if self.begin_date < date:
                 self.setEndDate(date)
-            elif self.__begin_date > date:
-                self.setEndDate(self.__begin_date)
-                self.__begin_date = date
+            elif self.begin_date > date:
+                self.setEndDate(self.begin_date)
+                self.begin_date = date
             else:
                 print("date1 and date2 are the same")
 
             # set high lighting of currently    selected date range
-            self.__format_range(self.__highlight_format)
+            self.format_range(self.highlight_format)
         else:
             # self.begin_date = date
             # self.end_date = date
             self.setStartDate(date)
             self.setEndDate(date)
-            print("HanhLT: beginn   ", self.__begin_date, "      end ", self.__end_date)
 
-    def __update_month_label(self, index):
-        # Calculate the year and month for the label at the given index
-        month_offset = index - 1
-        year = self.__current_year + (self.__current_month + month_offset - 1) // 12
-        month = (self.__current_month + month_offset - 1) % 12 + 1
-        # Create a QLocale object for the current locale
-        locale = QLocale()
+    def getStartDate(self):
+        return self.begin_date
 
-        # Convert the date to a string using the current locale
-        month_string = locale.standaloneMonthName(month, QLocale.ShortFormat)
-        year_string = str(year)
-        label_text = f"{month_string}"
-        # Set the label text
-        self.__month_labels[index].setText(label_text)
-        self.__month_labels[index].setProperty('circle', 'true')
-        self.__month_label.mousePressEvent = lambda event, label=label_text: self.__month_clicked(
-            self.__month_labels[index],
-            self.__month_labels[
-                index].text())
+    def getEndDate(self):
+        return self.end_date
 
-        self.__month_labels[index].setStyleSheet('''QLabel {padding: 10px;}''')
-        if self.__month_labels[index].text() == self.__label_month_pick:
-            self.__previous_month_label = self.__month_labels[index]
-            self.__month_labels[index].setStyleSheet('''
-                                       QLabel {
-                                        background-color: #A4D8FD;
-                                        padding: 8px;
-                                        border: 2px solid #A4D8FD;
-                                        border-radius: 10px;
-                                    }
-                                    ''')
+    def setStartDate(self, date):
+        self.begin_date = date
+        return self.begin_date
 
-    def __month_clicked(self, label_obj, content):
-        self.__change_Stylesheet(label_obj, check_year=False)
-        self.__sMonth = content
-        self.__sDateFinal = QDate(self.__sYear, month_names[self.__sMonth], self.__sDate)
-        self.__calendar.setSelectedDate(QDate(self.__sYear, month_names[self.__sMonth], self.__sDate))
+    def setEndDate(self, date):
+        self.end_date = date
+        return self.end_date
 
-    def __update_year_label(self, index):
-        # Calculate the year and month for the label at the given index
-        year_offset = index - 2
-        year = self.__current_year + year_offset
+    def getStartTime(self):
+        self.start_time = self.time_picker.start_time_value
+        return self.start_time
 
-        # Create a QLocale object for the current locale
-        locale = QLocale()
+    def getEndTime(self):
+        self.end_time = self.time_picker.end_time_value
+        return self.end_time
 
-        # Convert the date to a string using the current locale
-        year_string = str(year)
-        label_text = f"{year_string}"
-        # Set the label text
-        self.__year_labels[index].setText(label_text)
-        self.__year_label.mousePressEvent = lambda event, label=label_text: self.__year_clicked(
-            self.__year_labels[index],
-            self.__year_labels[
-                index].text())
+    def getStartValue(self):
+        return QDateTime(
+            self.begin_date, self.time_picker.start_time_value)
 
-        self.__year_labels[index].setStyleSheet('''QLabel {padding: 10px;}''')
-        if self.__year_labels[index].text() == self.__label_year_pick:
-            self.__previous_year_label = self.__year_labels[index]
-            self.__year_labels[index].setStyleSheet('''
-                               QLabel {
-                                background-color: #A4D8FD;
-                                padding: 8px;
-                                border: 2px solid #A4D8FD;
-                                border-radius: 10px;
-                            }
-                            ''')
-
-    def __year_clicked(self, label_obj, content):
-        self.__change_Stylesheet(label_obj, check_year=True)
-        self.__sYear = int(content)
-        self.__sDateFinal = QDate(self.__sYear, month_names[self.__sMonth], self.__sDate)
-        self.__calendar.setSelectedDate(QDate(self.__sYear, month_names[self.__sMonth], self.__sDate))
-
-    def __next_months(self):
-        # Increment the current month by 5
-        self.__current_month += 3
-        if self.__current_month > 12:
-            self.__current_month -= 12
-            self.__current_year += 1
-
-        # Update the month labels
-        for i in range(3):
-            self.__update_month_label(i)
-
-    def __previous_months(self):
-        # Decrement the current month by 5
-        self.__current_month -= 3
-        if self.__current_month < 1:
-            self.__current_month += 12
-            self.__current_year -= 1
-
-        # Update the month labels
-        for i in range(3):
-            self.__update_month_label(i)
-
-    def __next_years(self):
-        # Increment the current year by 5
-        self.__current_year += 3
-        # Update the year labels
-        for i in range(3):
-            self.__update_year_label(i)
-
-    def __previous_years(self):
-        # Decrement the current year by 5
-        self.__current_year -= 3
-        # Update the year labels
-        for i in range(3):
-            self.__update_year_label(i)
-
-    def __change_Stylesheet(self, label_obj, check_year):
-        # Reset the stylesheet of the previously clicked label
-        if check_year:
-            if self.__previous_year_label:
-                self.__previous_year_label.setStyleSheet('''
-                                    QLabel {
-                                        padding: 10px;
-                                    }
-                                ''')
-            # Set the stylesheet of the clicked label
-            label_obj.setStyleSheet('''
-                                QLabel {
-                                    background-color: #A4D8FD;
-                                    padding: 8px;
-
-                                    border: 2px solid #A4D8FD;
-                                    border-radius: 10px;
-                                }
-                            ''')
-            # padding - top: 16px;
-            # padding - right: 8px;
-            # padding - bottom: 16px;
-            # padding - left: 8px;
-
-            self.__label_year_pick = label_obj.text()
-
-            # Set the clicked label as the previously clicked label
-            self.__previous_year_label = label_obj
-        else:
-            if self.__previous_month_label:
-                self.__previous_month_label.setStyleSheet('''
-                                    QLabel {
-                                        padding: 8px;
-                                    }
-                                ''')
-            # Set the stylesheet of the clicked label
-            label_obj.setStyleSheet('''
-                                QLabel {
-                                    background-color: #A4D8FD;
-                                    padding: 8px;
-                                    border: 2px solid #A4D8FD;
-                                    border-radius: 10px;
-                                }
-                            ''')
-
-            self.__label_month_pick = label_obj.text()
-
-            # Set the clicked label as the previously clicked label
-            self.__previous_month_label = label_obj
-
+    def getEndValue(self):
+        return QDateTime(
+            self.end_date, self.time_picker.end_time_value)
 
 class TimePickerWidget(QWidget):
 
@@ -400,15 +237,15 @@ class TimePickerWidget(QWidget):
         super().__init__()
 
         # setting title
-        self.__main_layout = None
-        self.__end_time_edit = None
-        self.__start_time_edit = None
-        self.__end_time_label = None
-        self.__start_time_label = None
-        self.__end_widget = None
-        self.__start_widget = None
-        self.__end_time_layout = None
-        self.__start_time_layout = None
+        self.main_layout = None
+        self.end_time_edit = None
+        self.start_time_edit = None
+        self.end_time_label = None
+        self.start_time_label = None
+        self.end_widget = None
+        self.start_widget = None
+        self.end_time_layout = None
+        self.start_time_layout = None
         self.end_time_value = QTime(23, 59, 00)
         self.start_time_value = QTime(00, 00, 00)
         self.setWindowTitle("Python ")
@@ -422,16 +259,16 @@ class TimePickerWidget(QWidget):
     # method for components
     def UiComponents(self):
         # init Layout
-        self.__start_time_layout = QVBoxLayout()
-        self.__end_time_layout = QVBoxLayout()
-        self.__start_widget = QWidget()
-        self.__end_widget = QWidget()
+        self.start_time_layout = QVBoxLayout()
+        self.end_time_layout = QVBoxLayout()
+        self.start_widget = QWidget()
+        self.end_widget = QWidget()
 
-        self.__start_time_label = QLabel("Start time")
-        self.__end_time_label = QLabel("End time")
+        self.start_time_label = QLabel("Start time")
+        self.end_time_label = QLabel("End time")
 
-        self.__start_time_edit = QDateTimeEdit()
-        self.__start_time_edit.setStyleSheet('''
+        self.start_time_edit = QDateTimeEdit()
+        self.start_time_edit.setStyleSheet('''
             QDateTimeEdit {
                 border:1px solid #C0DCF2;
                 border-radius:3px;
@@ -459,11 +296,11 @@ class TimePickerWidget(QWidget):
             }
         ''')
 
-        self.__start_time_edit.setDisplayFormat("hh:mm:ss")
-        self.__start_time_edit.setTime(QTime(00, 00))
-        self.__start_time_edit.dateTimeChanged.connect(lambda: self.__st_method())
-        self.__end_time_edit = QDateTimeEdit()
-        self.__end_time_edit.setStyleSheet('''
+        self.start_time_edit.setDisplayFormat("hh:mm:ss")
+        self.start_time_edit.setTime(QTime(00, 00))
+        self.start_time_edit.dateTimeChanged.connect(lambda: self.st_method())
+        self.end_time_edit = QDateTimeEdit()
+        self.end_time_edit.setStyleSheet('''
             QDateTimeEdit {
                 border:1px solid #C0DCF2;
                 border-radius:3px;
@@ -490,35 +327,35 @@ class TimePickerWidget(QWidget):
                 background-color: #A4D8FD;
             }
         ''')
-        self.__end_time_edit.setDisplayFormat("hh:mm:ss")
-        self.__end_time_edit.setTime(QTime(23, 00))
-        self.__end_time_edit.dateTimeChanged.connect(lambda: self.__et_method())
+        self.end_time_edit.setDisplayFormat("hh:mm:ss")
+        self.end_time_edit.setTime(QTime(23, 00))
+        self.end_time_edit.dateTimeChanged.connect(lambda: self.et_method())
 
-        self.__start_time_layout.addWidget(self.__start_time_label)
-        self.__start_time_layout.addWidget(self.__start_time_edit)
-        self.__start_time_layout.setContentsMargins(0, 0, 0, 0)
+        self.start_time_layout.addWidget(self.start_time_label)
+        self.start_time_layout.addWidget(self.start_time_edit)
+        self.start_time_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.__end_time_layout.addWidget(self.__end_time_label)
-        self.__end_time_layout.addWidget(self.__end_time_edit)
-        self.__end_time_layout.setContentsMargins(0, 0, 0, 0)
+        self.end_time_layout.addWidget(self.end_time_label)
+        self.end_time_layout.addWidget(self.end_time_edit)
+        self.end_time_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.__start_widget.setLayout(self.__start_time_layout)
-        self.__end_widget.setLayout(self.__end_time_layout)
+        self.start_widget.setLayout(self.start_time_layout)
+        self.end_widget.setLayout(self.end_time_layout)
 
-        self.__main_layout = QHBoxLayout(self)
-        self.__main_layout.addWidget(self.__start_widget)
-        self.__main_layout.addWidget(self.__end_widget)
-        self.__main_layout.setContentsMargins(0, 0, 0, 0)
+        self.main_layout = QHBoxLayout(self)
+        self.main_layout.addWidget(self.start_widget)
+        self.main_layout.addWidget(self.end_widget)
+        self.main_layout.setContentsMargins(0, 0, 0, 0)
 
-        self.setLayout(self.__main_layout)
+        self.setLayout(self.main_layout)
 
-    def __st_method(self):
+    def st_method(self):
         # getting current datetime
-        self.start_time_value = self.__start_time_edit.time()
+        self.start_time_value = self.start_time_edit.time()
 
-    def __et_method(self):
+    def et_method(self):
         # getting current datetime
-        self.end_time_value = self.__end_time_edit.time()
+        self.end_time_value = self.end_time_edit.time()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

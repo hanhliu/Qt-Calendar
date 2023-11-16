@@ -126,8 +126,6 @@ class MainWindow(QMainWindow):
             smallest_key += 1
         return smallest_key
 
-
-
     def handle_drop_event(self, dictionary, current_key, new_value):
         keys = list(dictionary.keys())
         if current_key in keys and not new_value in dictionary.values():

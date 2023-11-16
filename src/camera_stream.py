@@ -233,15 +233,6 @@ class CameraApp(QMainWindow):
                         self.update_frame()
                         self.arrange_points()
 
-                # dx = event.position().x() - self.mouse_press_pos.x()
-                # dy = event.position().y() - self.mouse_press_pos.y()
-                # self.points[self.selected_point_index] = (self.points[self.selected_point_index][0] + dx,
-                #                                           self.points[self.selected_point_index][1] + dy)
-                # self.mouse_press_pos = event.position()
-                # self.update_frame()
-                #
-                # self.arrange_points()
-
     def mouseReleaseEvent(self, event):
         if self.drawing_enabled:
             self.selected_point_index = None

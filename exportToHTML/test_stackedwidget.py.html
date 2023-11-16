@@ -1,0 +1,109 @@
+<html>
+<head>
+<title>test_stackedwidget.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #808080;}
+.s3 { color: #6897bb;}
+.s4 { color: #6a8759;}
+</style>
+</head>
+<body bgcolor="#1e1f22">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+test_stackedwidget.py</font>
+</center></td></tr></table>
+<pre><span class="s0">import </span><span class="s1">sys</span>
+
+<span class="s0">from </span><span class="s1">PySide6.QtGui </span><span class="s0">import </span><span class="s1">QImage</span>
+<span class="s0">from </span><span class="s1">PySide6.QtCore </span><span class="s0">import </span><span class="s1">Qt</span>
+<span class="s0">from </span><span class="s1">PySide6.QtWidgets </span><span class="s0">import </span><span class="s1">QApplication</span><span class="s0">, </span><span class="s1">QWidget</span><span class="s0">, </span><span class="s1">QVBoxLayout</span><span class="s0">, </span><span class="s1">QLabel</span><span class="s0">, </span><span class="s1">QHBoxLayout</span><span class="s0">, </span><span class="s1">QMainWindow</span><span class="s0">, </span><span class="s1">QStackedWidget</span><span class="s0">, </span><span class="s1">\</span>
+    <span class="s1">QStackedLayout</span><span class="s0">, </span><span class="s1">QPushButton</span>
+
+
+<span class="s0">class </span><span class="s1">TestStackedWidget(QStackedWidget):</span>
+    <span class="s0">def </span><span class="s1">__init__(self</span><span class="s0">, </span><span class="s1">parent=</span><span class="s0">None</span><span class="s1">):</span>
+        <span class="s1">super().__init__(parent)</span>
+        <span class="s1">self.load_ui()</span>
+
+    <span class="s0">def </span><span class="s1">load_ui(self):</span>
+        <span class="s1">self.uiAnh1()</span>
+        <span class="s1">self.uiAnh2()</span>
+
+        <span class="s2"># start add ui to StackedWidget</span>
+        <span class="s1">self.addWidget(self.widget_anh2)  </span><span class="s2"># Cái này index = 0</span>
+        <span class="s1">self.addWidget(self.widget_anh1)  </span><span class="s2"># Cái này index = 1</span>
+
+        <span class="s2"># Muốn cho hiển thị Ui ảnh 1 nên phải setIndext, nếu ko set thì cái nào add vào trước nó sẽ hiển thị</span>
+        <span class="s2"># Ở đây nó sẽ hiển thị Ui ảnh 2 vì mình add vào trước mà</span>
+        <span class="s1">self.setCurrentIndex(</span><span class="s3">1</span><span class="s1">)  </span><span class="s2"># Nhớ chỗ này để hiểu logic bên dưới</span>
+
+    <span class="s0">def </span><span class="s1">onHandleBuoc3(self):</span>
+        <span class="s1">self.setCurrentIndex(</span><span class="s3">0</span><span class="s1">)  </span><span class="s2"># Hiển thị Ui ảnh 2</span>
+
+    <span class="s0">def </span><span class="s1">uiAnh1(self):</span>
+        <span class="s2"># create widget and layou</span>
+        <span class="s1">self.widget_anh1 = QWidget()</span>
+        <span class="s1">self.layout_anh1 = QVBoxLayout()</span>
+
+        <span class="s2"># create child widget</span>
+        <span class="s1">self.button1 = QPushButton(</span><span class="s4">&quot;Bước 1&quot;</span><span class="s1">)</span>
+        <span class="s1">self.button2 = QPushButton(</span><span class="s4">&quot;Bước 2&quot;</span><span class="s1">)</span>
+        <span class="s1">self.button3 = QPushButton(</span><span class="s4">&quot;Bước 3&quot;</span><span class="s1">)</span>
+        <span class="s1">self.button3.clicked.connect(self.onHandleBuoc3)</span>
+        <span class="s1">self.button4 = QPushButton(</span><span class="s4">&quot;Bước 4&quot;</span><span class="s1">)</span>
+
+        <span class="s2"># add widget to layout</span>
+        <span class="s1">self.layout_anh1.addWidget(self.button1)</span>
+        <span class="s1">self.layout_anh1.addWidget(self.button2)</span>
+        <span class="s1">self.layout_anh1.addWidget(self.button3)</span>
+        <span class="s1">self.layout_anh1.addWidget(self.button4)</span>
+
+        <span class="s2">#set layout to widget</span>
+        <span class="s1">self.widget_anh1.setLayout(self.layout_anh1)</span>
+
+    <span class="s0">def </span><span class="s1">uiAnh2(self):</span>
+        <span class="s1">self.widget_anh2 = QWidget()</span>
+        <span class="s1">self.layout_anh2 = QVBoxLayout()</span>
+
+        <span class="s2"># create child widget</span>
+        <span class="s1">self.open1 = QPushButton(</span><span class="s4">&quot;Open 1&quot;</span><span class="s1">)</span>
+        <span class="s1">self.open2 = QPushButton(</span><span class="s4">&quot;Open 2&quot;</span><span class="s1">)</span>
+        <span class="s1">self.open3 = QPushButton(</span><span class="s4">&quot;Open 3&quot;</span><span class="s1">)</span>
+
+        <span class="s2"># add widget to layout</span>
+        <span class="s1">self.layout_anh2.addWidget(self.open1)</span>
+        <span class="s1">self.layout_anh2.addWidget(self.open2)</span>
+        <span class="s1">self.layout_anh2.addWidget(self.open3)</span>
+
+        <span class="s2"># set layout to widget</span>
+        <span class="s1">self.widget_anh2.setLayout(self.layout_anh2)</span>
+
+<span class="s0">class </span><span class="s1">StackedApp(QMainWindow):</span>
+    <span class="s0">def </span><span class="s1">__init__(self):</span>
+        <span class="s1">super().__init__()</span>
+
+        <span class="s1">self.setWindowTitle(</span><span class="s4">&quot;Video Player&quot;</span><span class="s1">)</span>
+
+        <span class="s1">self.central_widget = QWidget()</span>
+        <span class="s1">self.setCentralWidget(self.central_widget)</span>
+
+        <span class="s1">self.layout = QVBoxLayout()</span>
+        <span class="s1">self.test_stacked_widget = TestStackedWidget()</span>
+        <span class="s1">self.layout.addWidget(self.test_stacked_widget)</span>
+        <span class="s1">self.central_widget.setLayout(self.layout)</span>
+
+    <span class="s0">def </span><span class="s1">show_dialog(self):</span>
+        <span class="s0">pass</span>
+
+
+<span class="s0">if </span><span class="s1">__name__ == </span><span class="s4">&quot;__main__&quot;</span><span class="s1">:</span>
+    <span class="s1">app = QApplication(sys.argv)</span>
+    <span class="s1">main_window = StackedApp()</span>
+    <span class="s1">main_window.show()</span>
+    <span class="s1">sys.exit(app.exec())</span></pre>
+</body>
+</html>

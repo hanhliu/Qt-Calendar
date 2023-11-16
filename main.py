@@ -1,60 +1,55 @@
-import os
 import sys
-import os
-from PySide6.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout, QCalendarWidget, QPushButton, QHBoxLayout
-from PySide6.QtGui import QGuiApplication
-from src.custom_calendar import MonthViewer
-from src.side_menu import LeftSideMenu
+from PyQt5.QtWidgets import QApplication, QMainWindow, QComboBox, QLabel, QVBoxLayout, QWidget
+from PyQt5.QtCore import QDate
 
-
-class CustomCalendarWidget(QCalendarWidget):
-    def wheelEvent(self, event):
-        event.ignore()
-
-class MainWindow(QMainWindow):
+class MyMainWindow(QMainWindow):
     def __init__(self):
-        QMainWindow.__init__(self)
-        screen = QGuiApplication.primaryScreen()
-        full_screen_size = screen.geometry()
-        desktop_screen_size = screen.availableGeometry()
-        self.width_screen_desktop = desktop_screen_size.width()
-        self.height_screen_desktop = desktop_screen_size.height()
-        self.width_screen_fullscreen = full_screen_size.width()
-        self.height_screen_fullscreen = full_screen_size.height()
-        screen_size = screen.size()
-        width_screen = screen_size.width()
-        height_screen = screen_size.height()
+        super().__init__()
+        self.init_ui()
 
-        self.setGeometry(0, 0, self.width_screen_desktop,
-                         self.height_screen_desktop)
+    def init_ui(self):
+        self.setWindowTitle('Month and Year Selection')
+        self.setGeometry(100, 100, 400, 200)
 
-        self.layout = QVBoxLayout()
-        self.layout.setContentsMargins(0, 0, 0, 0)
-        self.month_view = MonthViewer()
-        self.button = QPushButton("Get Value")
-        self.button.clicked.connect(self.getValue)
+        self.month_combo = QComboBox()
+        self.year_combo = QComboBox()
 
-        self.layout.addWidget(self.month_view)
-        self.layout.addWidget(self.button)
-        side_widget = LeftSideMenu()
+        # Add months to the month combo box
+        months = ["January", "February", "March", "April", "May", "June",
+                  "July", "August", "September", "October", "November", "December"]
+        self.month_combo.addItems(months)
+        current_month = QDate.currentDate().month()
+        self.month_combo.setCurrentIndex(current_month - 1)
 
-        main_layout = QHBoxLayout()
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.addWidget(side_widget)
-        main_layout.addLayout(self.layout)
+        # Add years to the year combo box (5 years before and 5 years after the current year)
+        current_year = QDate.currentDate().year()
+        years = [str(current_year - i) for i in range(5)]
+        self.year_combo.addItems(years)
 
-        self.central_widget = QWidget()
-        self.central_widget.setLayout(main_layout)
-        self.setCentralWidget(self.central_widget)
+        self.label = QLabel("Selected Date: ")
 
-    def getValue(self):
-        print("HanhLT: start date  ", self.month_view.getStartDate(), "    end  date  ", self.month_view.getEndDate())
-        print("HanhLT: start time   ", self.month_view.getStartTime(), "     end time    ",
-              self.month_view.getEndTime())
+        layout = QVBoxLayout()
+        layout.addWidget(self.month_combo)
+        layout.addWidget(self.year_combo)
+        layout.addWidget(self.label)
 
+        central_widget = QWidget()
+        central_widget.setLayout(layout)
+        self.setCentralWidget(central_widget)
 
-if __name__ == "__main__":
+        self.month_combo.activated[str].connect(self.on_combo_activated)
+        self.year_combo.activated[str].connect(self.on_combo_activated)
+
+    def on_combo_activated(self, text):
+        selected_month = self.month_combo.currentText()
+        selected_year = self.year_combo.currentText()
+        self.label.setText(f"Selected Date: {selected_month} {selected_year}")
+
+def main():
     app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
+    main_window = MyMainWindow()
+    main_window.show()
+    sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
