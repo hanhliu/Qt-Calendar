@@ -11,6 +11,8 @@ class SelectableFrame(QFrame):
 class DrawingWidget(QWidget):
     def __init__(self,size_grid=4):
         super().__init__()
+        self.paint_borders = False
+        self.testFlag = False
         self.size_grid = size_grid
         self.setFixedSize(800, 600)
         self.grid_layout = QGridLayout(self)
@@ -25,9 +27,11 @@ class DrawingWidget(QWidget):
         self.selection_start = None
         self.selection_end = None
         self.selected_frames = set()  # Use a set to store the row and column indices of selected frames
+        self.merged_frame = []
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
+            self.testFlag = True
             self.selection_start = event.pos()
             self.selection_end = event.pos()
 
@@ -57,9 +61,14 @@ class DrawingWidget(QWidget):
                 if rect.intersects(selection_rect):
                     row, col, _, _ = self.grid_layout.getItemPosition(i)
                     self.selected_frames.add((row, col))
+                    frame.is_selected = True
+                    frame.update()
 
             print("Selected frames:", self.selected_frames)
-
+            # Clear the drawn rectangle
+            self.selection_start = None
+            self.selection_end = None
+            self.testFlag = False
             # Redraw the widgets
             self.update()
 
@@ -71,15 +80,33 @@ class DrawingWidget(QWidget):
             frame = self.grid_layout.itemAt(i).widget()
             rect = frame.geometry()
             row, col, _, _ = self.grid_layout.getItemPosition(i)
+            if any((row, col) in frame for frame in self.merged_frame):
+                if self.paint_borders:
+                    painter.setPen(QPen(QColor(0, 0, 0), 1, Qt.DashLine))
+                    # Draw bottom edge
+                    painter.drawLine(rect.bottomLeft(), rect.bottomRight())
+                    # Draw left edge
+                    painter.drawLine(rect.bottomLeft(), rect.topLeft())
 
-            # Draw a red border around selected frames
-            if (row, col) in self.selected_frames:
-                painter.setPen(QPen(QColor(255, 0, 0), 2))
-                painter.drawRect(rect)
+                    # min_row = min(row for row, _ in self.merged_frame)
+                    # max_row = max(row for row, _ in self.merged_frame)
+                    # min_col = min(col for _, col in self.merged_frame)
+                    # max_col = max(col for _, col in self.merged_frame)
+                    #
+                    # # Calculate the position and size of the bounding rectangle
+                    # start_rect = self.grid_layout.itemAtPosition(min_row, min_col).geometry().topLeft()
+                    # end_rect = self.grid_layout.itemAtPosition(max_row, max_col).geometry().bottomRight()
+                    #
+                    # total_rect = QRect(start_rect, end_rect)
+                    # painter.setPen(QPen(QColor(0, 0, 0), 2))
+                    # painter.drawRect(total_rect)
 
+                else:
+                    painter.setPen(QPen(QColor(0, 0, 0), 2))
+                    painter.drawRect(rect)
             # Draw the original grid frames
             else:
-                painter.setPen(QPen(QColor(0, 0, 0), 1))
+                painter.setPen(QPen(QColor(0, 0, 0), 2))
                 painter.drawRect(rect)
 
         # Draw the overlay rectangle
@@ -87,6 +114,21 @@ class DrawingWidget(QWidget):
             painter.setPen(QPen(QColor(0, 0, 255), 1, Qt.DashLine))
             overlay_rect = QRect(self.selection_start, self.selection_end).normalized()
             painter.drawRect(overlay_rect)
+
+        # Draw a red border around the total selected area
+        if self.selected_frames and not self.testFlag:
+            min_row = min(row for row, _ in self.selected_frames)
+            max_row = max(row for row, _ in self.selected_frames)
+            min_col = min(col for _, col in self.selected_frames)
+            max_col = max(col for _, col in self.selected_frames)
+
+            # Calculate the position and size of the bounding rectangle
+            start_rect = self.grid_layout.itemAtPosition(min_row, min_col).geometry().topLeft()
+            end_rect = self.grid_layout.itemAtPosition(max_row, max_col).geometry().bottomRight()
+
+            total_rect = QRect(start_rect, end_rect)
+            painter.setPen(QPen(QColor(255, 0, 0), 2))
+            painter.drawRect(total_rect)
 
 
 class Tezt(QWidget):
@@ -105,10 +147,11 @@ class Tezt(QWidget):
         self.combo_box.currentIndexChanged.connect(self.onComboIndexChanged)
 
         self.merge_button = QPushButton("Merge")
+        self.merge_button.clicked.connect(self.mergeSelected)
         self.reset_button = QPushButton("Reset")
         # Set up a new layout with the selected size
-        rows, cols = map(int, self.combo_box.currentText().split('x'))
-        self.drawing_widget = DrawingWidget(size_grid=rows)
+        self.rows, self.cols = map(int, self.combo_box.currentText().split('x'))
+        self.drawing_widget = DrawingWidget(size_grid=self.rows)
 
         self.layout_top = QHBoxLayout()
         self.layout_top.addWidget(self.combo_box)
@@ -119,21 +162,58 @@ class Tezt(QWidget):
 
         self.setLayout(self.layout)
 
+    def mergeSelected(self):
+        if len(self.drawing_widget.selected_frames) >= 2:
+            self.drawing_widget.paint_borders = True
+            # Check if new_set shares any elements with sets in the list
+            found_index = next((i for i, s in enumerate(self.drawing_widget.merged_frame) if any(e in s for e in self.drawing_widget.selected_frames)), None)
+            matching_indices = [i for i, s in enumerate(self.drawing_widget.merged_frame) if any(e in self.drawing_widget.selected_frames for e in s)]
+            # Remove all matching sets from the list
+            for index in matching_indices:
+                self.drawing_widget.merged_frame.pop(index)
+            # if found_index is not None:
+            #     # If found, remove the existing set
+            #     self.drawing_widget.merged_frame.pop(found_index)
+
+            # Append the new set
+            self.drawing_widget.merged_frame.append(self.drawing_widget.selected_frames)
+
+            print("HanhLT: self.drawing_widget.merged_frame   ", self.drawing_widget.merged_frame)
+
+            self.drawing_widget.testFlag = True
+            # Clear the drawn rectangle
+            self.drawing_widget.selection_start = None
+            self.drawing_widget.selection_end = None
+            # self.drawing_widget.selected_frames.clear()
+            self.drawing_widget.update()
+
+    def get_selected_positions(self):
+        return [(i, j) for frame in self.drawing_widget.selected_frames for i in range(self.rows) for j in range(self.cols) if self.frames[i][j] is frame]
+
     def onComboIndexChanged(self, index):
         selected_item = self.combo_box.currentText()
+
+        # Clear the drawn rectangle
+        self.drawing_widget.selection_start = None
+        self.drawing_widget.selection_end = None
+        self.drawing_widget.selected_frames.clear()
+        self.drawing_widget.update()
+
+        # Clear the red borders on selected frames
+        for i in range(self.drawing_widget.grid_layout.count()):
+            frame = self.drawing_widget.grid_layout.itemAt(i).widget()
+            frame.is_selected = False
+            frame.update()
 
         # Clear the existing layout
         for i in reversed(range(self.drawing_widget.grid_layout.count())):
             widgetToRemove = self.drawing_widget.grid_layout.itemAt(i).widget()
-            # remove it from the layout list
-            self.drawing_widget.grid_layout.removeWidget(widgetToRemove)
-            # remove it from the gui
             widgetToRemove.setParent(None)
 
         # Set up a new layout with the selected size
-        rows, cols = map(int, selected_item.split('x'))
-        for i in range(rows):
-            for j in range(cols):
+        self.rows, self.cols = map(int, selected_item.split('x'))
+        for i in range(self.rows):
+            for j in range(self.cols):
                 frame = SelectableFrame(self.drawing_widget)
                 self.drawing_widget.grid_layout.addWidget(frame, i, j)
 
@@ -146,4 +226,36 @@ if __name__ == '__main__':
     window.setWindowTitle('Grid with Selection and Drawing')
     # window.setGeometry(100, 100, 400, 400)
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())
+
+    # def mergeSelected(self):
+    #     if len(self.drawing_widget.selected_frames) >= 2:
+    #         # Find the minimum and maximum row and column indices of selected frames
+    #         min_row = min(row for row, _ in self.drawing_widget.selected_frames)
+    #         max_row = max(row for row, _ in self.drawing_widget.selected_frames)
+    #         min_col = min(col for _, col in self.drawing_widget.selected_frames)
+    #         max_col = max(col for _, col in self.drawing_widget.selected_frames)
+    #
+    #         # Calculate the total size of the merged frame
+    #         total_rows = max_row - min_row + 1
+    #         total_cols = max_col - min_col + 1
+    #
+    #         # Create the merged frame
+    #         merged_frame = SelectableFrame()
+    #
+    #         # Add the merged frame to the grid layout
+    #         self.drawing_widget.grid_layout.addWidget(
+    #             merged_frame, min_row, min_col, total_rows, total_cols
+    #         )
+    #
+    #         # Remove the selected frames from the grid layout
+    #         for frame in self.drawing_widget.selected_frames:
+    #             frame_widget = self.drawing_widget.grid_layout.itemAtPosition(*frame).widget()
+    #             frame_widget.setParent(None)
+    #
+    #         # Clear the set of selected frames
+    #         self.drawing_widget.selected_frames.clear()
+    #         self.drawing_widget.selected_frames.add((min_row, min_col))
+    #
+    #         # Update the UI
+    #         self.drawing_widget.update()
