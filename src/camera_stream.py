@@ -32,6 +32,15 @@ class CameraApp(QMainWindow):
 
         self.layout.addLayout(self.stacked_widget)
 
+        self.button_checkin = QPushButton("Chieu vao")
+        self.button_checkin.clicked.connect(self.allow_draw_checkin)
+        self.button_checkout = QPushButton("Chieu ra")
+        self.button_checkout.clicked.connect(self.allow_draw_checkout)
+        self.hbox = QHBoxLayout()
+        self.hbox.addWidget(self.button_checkin)
+        self.hbox.addWidget(self.button_checkout)
+        self.layout.addLayout(self.hbox)
+
         self.start_button = QPushButton("Start Camera")
         self.start_button.clicked.connect(self.start_camera)
         self.layout.addWidget(self.start_button)
@@ -44,16 +53,11 @@ class CameraApp(QMainWindow):
         self.draw_button.clicked.connect(self.toggle_drawing)
         self.layout.addWidget(self.draw_button)
 
-        self.draw_rec = QGroupBox("Draw Rectangle")
-        # self.draw_rec.clicked.connect(self.draw_rectangle)
-        self.layout.addWidget(self.draw_rec)
-
         self.clear_button = QPushButton("CLEAR SHAPE")
         self.clear_button.clicked.connect(self.clear_shape)
         self.layout.addWidget(self.clear_button)
 
         self.drawing_enabled = False
-        self.drawing_rec = False
         # Variables to store the rectangle coordinates
         self.rectangle_start = None
         self.rectangle_end = None
@@ -68,12 +72,19 @@ class CameraApp(QMainWindow):
         self.selected_point_index = None
         self.mouse_press_pos = None
         self.mouse_move_pos = None
+
+    def allow_draw_checkin(self):
+        pass
+
+    def allow_draw_checkout(self):
+        pass
+
     def clear_shape(self):
         self.points = []  # Reset the points
         self.drawing_enabled = False
-        self.drawing_rec = False
+
     def start_camera(self):
-        rtsp_url = "rtsp://admin:abcd1234@113.161.47.101/Streaming/channels/102"  # Replace with your RTSP stream URL
+        rtsp_url = "rtsp://admin:abcd1234@113.160.187.79/Streaming/channels/102"  # Replace with your RTSP stream URL
         self.capture = cv2.VideoCapture(rtsp_url)
         if not self.capture.isOpened():
             print("Error: Camera not accessible.")
@@ -89,38 +100,6 @@ class CameraApp(QMainWindow):
             self.camera_active = False
             self.camera_frame.clear()
 
-    def do_lines_intersect(self, p1, q1, p2, q2):
-        def orientation(p, q, r):
-            val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
-            if val == 0:
-                return 0  # Collinear
-            return 1 if val > 0 else 2  # Clockwise or Counterclockwise
-
-        o1 = orientation(p1, q1, p2)
-        o2 = orientation(p1, q1, q2)
-        o3 = orientation(p2, q2, p1)
-        o4 = orientation(p2, q2, q1)
-
-        if o1 != o2 and o3 != o4:
-            return True
-
-        if o1 == 0 and self.on_segment(p1, p2, q1):
-            return True
-        if o2 == 0 and self.on_segment(p1, q2, q1):
-            return True
-        if o3 == 0 and self.on_segment(p2, p1, q2):
-            return True
-        if o4 == 0 and self.on_segment(p2, q1, q2):
-            return True
-
-        return False
-
-    def on_segment(self, p, q, r):
-        if (q[0] <= max(p[0], r[0]) and q[0] >= min(p[0], r[0]) and
-                max(p[1], r[1]) >= q[1] >= min(p[1], r[1])):
-            return True
-        return False
-
     def update_frame(self):
         ret, frame = self.capture.read()
         if ret:
@@ -132,12 +111,6 @@ class CameraApp(QMainWindow):
                 if len(self.points) == 4:
                     for i in range(len(self.points)):
                         self.draw_line(self.points[i], self.points[(i + 1) % 4])
-                    # diagonals_intersect = self.do_lines_intersect(self.points[0], self.points[2],
-                    #                                               self.points[1], self.points[3])
-                    # if diagonals_intersect:
-                    #     pass
-                    # else:
-                    #     self.points = []
 
             temp_pixmap = QPixmap.fromImage(
                 QImage(self.current_frame.data, self.current_frame.shape[1], self.current_frame.shape[0],
@@ -164,9 +137,6 @@ class CameraApp(QMainWindow):
     def toggle_drawing(self):
         self.drawing_enabled = True
 
-    def draw_rectangle(self):
-        self.drawing_rec = True
-
     def draw_line(self, start_point, end_point):
         scaled_start = (int(start_point[0]), int(start_point[1]))
         scaled_end = (int(end_point[0]), int(end_point[1]))
@@ -183,18 +153,11 @@ class CameraApp(QMainWindow):
                     self.points.append(point)
                     # If all four points have been selected, find top-left and bottom-right points
                     if len(self.points) == 4:
-                        print("HanhLT: self.point  ", self.points)
                         self.arrange_points()
-
-        if self.drawing_rec:
-            if event.button() == Qt.LeftButton:
-                self.rectangle_start = event.pos()
-                self.rectangle_end = event.pos()
-                self.update_frame()
 
         if self.drawing_enabled:
             for i, point in enumerate(self.points):
-                point_rect = QRect(point[0] - 5, point[1] - 5, 10, 10)
+                point_rect = QRect(point[0] - 20, point[1] - 20, 40, 40)
                 if point_rect.contains(event.position().toPoint()):
                     self.selected_point_index = i
                     self.mouse_press_pos = event.position()
@@ -213,8 +176,6 @@ class CameraApp(QMainWindow):
             top_left, top_right, bottom_right, bottom_left = sorted_points
 
             self.points = [top_left, top_right, bottom_right, bottom_left]
-
-            print("Arranged Points:", self.points)
 
     def mouseMoveEvent(self, event):
         if self.drawing_enabled:
