@@ -15,13 +15,24 @@ class NewGrid(QMainWindow):
         self.central_widget = QWidget()
         self.central_layout = QVBoxLayout()
 
-        self.grid_widget = GridWidget()
+        grid_layout = QGridLayout()
+        grid_layout.setSpacing(1)
 
-        self.button_merge = QPushButton("Merge")
-        self.button_merge.clicked.connect(self.merge_cell)
+        # Largest item in the center
+        largest_item = QWidget()
+        largest_item.setStyleSheet('background-color: lightblue;')
+        grid_layout.addWidget(largest_item, 1, 1, 2, 2)  # Span 3 rows and 3 columns, starting from row 1 and column 1
 
-        self.central_layout.addWidget(self.grid_widget)
-        self.central_layout.addWidget(self.button_merge)
+        # Twelve items surrounding the largest item
+        for row in range(0, 4):
+            for col in range(0, 4):
+                if row == 1 and col == 1:
+                    continue  # Skip the center item
+                item = QWidget()
+                item.setStyleSheet('background-color: lightblue;')
+                grid_layout.addWidget(item, row, col)
+
+        self.central_layout.addLayout(grid_layout)
 
         self.central_widget.setLayout(self.central_layout)
         self.setCentralWidget(self.central_widget)
@@ -50,8 +61,8 @@ if __name__ == "__main__":
 #         item.setStyleSheet('background-color: lightblue;')
 #         grid_layout.addWidget(item, row, col)
 
-'''8 item with 1 item biggest'''
-# Large item
+# '''8 item with 1 item biggest'''
+# # Large item
 # large_item = QWidget()
 # large_item.setStyleSheet('background-color: lightblue;')
 # grid_layout.addWidget(large_item, 0, 0, 3, 3)  # Span 3 rows and 3 columns
@@ -80,8 +91,8 @@ if __name__ == "__main__":
 # grid_layout.addWidget(item_right_2, 1, 3)
 # grid_layout.addWidget(item_right_3, 2, 3)
 # grid_layout.addWidget(item_right_4, 3, 3)
-
-'''6 item with 1 item biggest'''
+#
+# '''6 item with 1 item biggest'''
 # # Large item
 # large_item = QWidget()
 # large_item.setStyleSheet('background-color: lightblue;')

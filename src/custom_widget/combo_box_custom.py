@@ -20,9 +20,9 @@ class ComboBoxExample(QMainWindow):
         model = QStandardItemModel()
 
         # Create items with icons and text
-        item1 = QStandardItem(QIcon('/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/sort-down.png'), "Option 1")
-        item2 = QStandardItem(QIcon('/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/sort-down.png'), "Option 2")
-        item3 = QStandardItem(QIcon('/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/sort-down.png'), "Option 3")
+        item1 = QStandardItem(QIcon('/assets/sort-down.png'), "Option 1")
+        item2 = QStandardItem(QIcon('/assets/sort-down.png'), "Option 2")
+        item3 = QStandardItem(QIcon('/assets/sort-down.png'), "Option 3")
 
         # Add items to the model
         model.appendRow(item1)

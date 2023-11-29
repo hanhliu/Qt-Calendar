@@ -2,7 +2,7 @@ import sys
 
 import PySide6
 from PySide6.QtCore import Qt, QModelIndex
-from PySide6.QtGui import QAction, QStandardItem, QStandardItemModel, QPainter, QPixmap
+from PySide6.QtGui import QAction, QStandardItem, QStandardItemModel, QPainter, QPixmap, QPaintEvent, QColor
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QMenu, QMainWindow, \
     QWidgetAction, QListView, QStyledItemDelegate, QStyleOptionViewItem, QStyle, QFrame, QSizePolicy, QScrollArea, \
@@ -18,16 +18,28 @@ class CustomMenu(QWidget):
         # create layout
         self.layout = QVBoxLayout()
         self.layout.setAlignment(Qt.AlignTop)
+        self.warning_event_dialog = WarningEventDialog()
         self.show_menu_button = QPushButton("Show menu", self)
         self.show_menu_button.clicked.connect(self.show_menu)
         self.layout.addWidget(self.show_menu_button)
         self.setLayout(self.layout)
 
     def show_menu(self):
-        self.main_menu = QMenu(self)
+        button_pos = self.show_menu_button.mapToGlobal(self.show_menu_button.rect().bottomLeft())
+        self.warning_event_dialog.showAt(button_pos)
+
+class WarningEventDialog(QDialog):
+    def __init__(self):
+        super().__init__()
+        print("HanhLT: init dialog")
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint | Qt.WindowType.Popup)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+        self.setModal(False)
+        self.layout = QVBoxLayout()
         custom_widget = QWidget()
         custom_widget.setStyleSheet("background-color: white; border-radius: 4px;")
-        custom_widget.setFixedHeight(700)
+        custom_widget.setFixedHeight(600)
         layout_notification = QVBoxLayout()
         layout_notification.setAlignment(Qt.AlignmentFlag.AlignTop)
         '''*********'''
@@ -43,23 +55,33 @@ class CustomMenu(QWidget):
         layout_notification.addLayout(self.layout_button)
         layout_notification.addWidget(self.warning_list_view)
         custom_widget.setLayout(layout_notification)
+        self.layout.addWidget(custom_widget)
+        self.setMaximumSize(500, 500)
+        self.setLayout(self.layout)
 
-        custom_action = QWidgetAction(self)
-        custom_action.setDefaultWidget(custom_widget)
-        # Add actions to the menu
-        self.main_menu.addAction(custom_action)
-        self.main_menu.setAttribute(Qt.WA_TranslucentBackground)
-        self.main_menu.setWindowFlag(Qt.FramelessWindowHint)
-        self.main_menu.setStyleSheet("""
-             QMenu {
-                font-size: 14px;
-                background-color: white;
-                border-radius: 8px;
-                margin-top: 0px;
-                margin-bottom: 0px;
-                }
-        """)
-        self.main_menu.exec(self.show_menu_button.mapToGlobal(self.show_menu_button.rect().bottomRight()))
+    def paintEvent(self, event: QPaintEvent) -> None:
+        # draw rounded rect
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setPen(Qt.NoPen)
+        painter.setBrush(QColor("#FFFFFF"))
+        painter.drawRoundedRect(self.rect(), 4, 4)
+        painter.drawRoundedRect(self.rect(), 4, 4)
+
+    def showAt(self, position):
+        # Get the screen geometry
+        screen_geometry = QApplication.primaryScreen().availableGeometry()
+
+        # Calculate the new x and y position, ensuring they are within the bounds of the screen
+        x = max(0, min(position.x() - 350, screen_geometry.width() - self.width()))
+        y = max(0, min(position.y(), screen_geometry.height() - self.height()))
+
+
+
+        # Move and show the dialog
+        self.move(position.x(), position.y())
+        self.setModal(False)
+        self.show()
 
     def add_items_today(self, event):
         self.warning_list_view.add_to_list_today()
@@ -86,8 +108,21 @@ class WarningListView(QListView):
         self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         self.list_view_model = QStandardItemModel()
         self.setModel(self.list_view_model)
+        self.clicked.connect(self.item_clicked)
         self.populate_notifications()
         self.set_style_sheet()
+
+    def item_clicked(self, index):
+
+        item: ItemNotification = self.list_view_model.itemFromIndex(index)
+        item.on_item_click()
+
+        print("HanhLT: chay vao day    ", item.main_widget.layout().itemAt(0).layout().itemAt(0).widget().setVisible(False))
+        print("HanhLT: item.state_read   ", item.state_read)
+        # Giải thích: item là ItemNotification, .main_widget là lấy main_widget, .layout() lấy layout của main_widget chính là QHBoxLayout,
+        # .itemAt(0) thứ nhất lấy item đầu tiên đc add vào cái QHBoxLayout đó, .layout() lấy layout của item đầu tiên đó ở đây là QVBoxLayout,
+        # .itemAt(0) thứ hai lấy item đầu  tiên vừa đc add vào QVBoxLayout đó, .widget() lấy ra widget được add vào chính là
+        # SvgWidget và setVisible cho nó
 
     def set_style_sheet(self):
         self.setStyleSheet("QListView { background-color: transparent; }")
@@ -100,7 +135,7 @@ class WarningListView(QListView):
         self.older_label.setFlags(self.older_label.flags() & ~Qt.ItemIsSelectable)
 
         # Create and append ItemNotification instances to the list
-        for i in range(5):  # Create 5 items as an example; you can adjust the range as needed
+        for i in range(3):  # Create 5 items as an example; you can adjust the range as needed
             item = ItemNotification()
             self.list_alert_today.append(item)
 
@@ -183,6 +218,7 @@ class ItemDateName(QStandardItem):
 class ItemNotification(QStandardItem):
     def __init__(self,):
         super().__init__()
+        self.state_read = False
         self.load_ui()
 
     def load_ui(self):
@@ -191,10 +227,11 @@ class ItemNotification(QStandardItem):
         self.main_layout.setSpacing(2)
         # self.widget_state_read = QWidget()
         self.layout_state_read = QVBoxLayout()
-        svg_state_read = QSvgWidget()
-        svg_state_read.load("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/state_read.svg")
-        svg_state_read.setFixedSize(10, 10)
-        self.layout_state_read.addWidget(svg_state_read)
+
+        self.svg_state_read = QSvgWidget()
+        self.svg_state_read.load("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/state_read.svg")
+        self.svg_state_read.setFixedSize(10, 10)
+        self.layout_state_read.addWidget(self.svg_state_read)
 
         self.layout_image_event = QVBoxLayout()
         self.layout_image_event.setContentsMargins(0, 0, 0, 0)
@@ -202,7 +239,7 @@ class ItemNotification(QStandardItem):
         self.layout_image_event.setAlignment(Qt.AlignmentFlag.AlignCenter)
         # Load an image using QPixmap
         self.image_label = QLabel()
-        pixmap = QPixmap("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/image_event.png")  # Replace with the actual image file path
+        pixmap = QPixmap("/assets/image_event.png")  # Replace with the actual image file path
         self.image_label.setPixmap(pixmap)
         self.label_time = QLabel("10:10:10")
         self.label_time.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -237,17 +274,12 @@ class ItemNotification(QStandardItem):
         self.setData(self.main_widget, Qt.UserRole)
 
         # create listen click to item
-        self.main_widget.mousePressEvent = self.on_item_click
+        # self.main_widget.mousePressEvent = self.on_item_click
 
-    def on_item_click(self, event):
-        if event.button() == Qt.LeftButton:
-            print("HanhLT: click to item")
-            # self.dialog = QDialog()
-            # self.dialog.setEnabled(False)
-            # self.dialog.repaint()
-            # self.dialog.setEnabled(True)
-            # self.dialog.setWindowFlag(Qt.WindowStaysOnTopHint)
-            # self.dialog.exec()
+    def on_item_click(self):
+        print("HanhLT: click to item")
+        self.state_read = True
+        self.svg_state_read.setVisible(False)
 
 class ButtonFilterNotification(QPushButton):
     def __init__(self, title=None, type_button=None, click=None):

@@ -1,7 +1,11 @@
 import sys
-from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QFrame, QVBoxLayout, QComboBox, QPushButton, QHBoxLayout
+from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QFrame, QVBoxLayout, QComboBox, QPushButton, \
+    QHBoxLayout, QDialog, QMenu, QLabel, QMainWindow, QWidgetAction
 from PyQt5.QtGui import QPainter, QColor, QPen
 from PyQt5.QtCore import Qt, QRect
+
+from src.grid_custom.item_list_widget import ItemGridType
+
 
 class SelectableFrame(QFrame):
     def __init__(self, parent=None):
@@ -87,20 +91,6 @@ class DrawingWidget(QWidget):
                     painter.drawLine(rect.bottomLeft(), rect.bottomRight())
                     # Draw left edge
                     painter.drawLine(rect.bottomLeft(), rect.topLeft())
-
-                    # min_row = min(row for row, _ in self.merged_frame)
-                    # max_row = max(row for row, _ in self.merged_frame)
-                    # min_col = min(col for _, col in self.merged_frame)
-                    # max_col = max(col for _, col in self.merged_frame)
-                    #
-                    # # Calculate the position and size of the bounding rectangle
-                    # start_rect = self.grid_layout.itemAtPosition(min_row, min_col).geometry().topLeft()
-                    # end_rect = self.grid_layout.itemAtPosition(max_row, max_col).geometry().bottomRight()
-                    #
-                    # total_rect = QRect(start_rect, end_rect)
-                    # painter.setPen(QPen(QColor(0, 0, 0), 2))
-                    # painter.drawRect(total_rect)
-
                 else:
                     painter.setPen(QPen(QColor(0, 0, 0), 2))
                     painter.drawRect(rect)
@@ -131,7 +121,7 @@ class DrawingWidget(QWidget):
             painter.drawRect(total_rect)
 
 
-class Tezt(QWidget):
+class Tezt(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.load_ui()
@@ -148,7 +138,8 @@ class Tezt(QWidget):
 
         self.merge_button = QPushButton("Merge")
         self.merge_button.clicked.connect(self.mergeSelected)
-        self.reset_button = QPushButton("Reset")
+        self.reset_button = QPushButton("Save")
+        self.reset_button.clicked.connect(self.save_click)
         # Set up a new layout with the selected size
         self.rows, self.cols = map(int, self.combo_box.currentText().split('x'))
         self.drawing_widget = DrawingWidget(size_grid=self.rows)
@@ -162,21 +153,20 @@ class Tezt(QWidget):
 
         self.setLayout(self.layout)
 
+    def save_click(self):
+        self.close()
+
     def mergeSelected(self):
         if len(self.drawing_widget.selected_frames) >= 2:
             self.drawing_widget.paint_borders = True
-            # Check if new_set shares any elements with sets in the list
-            found_index = next((i for i, s in enumerate(self.drawing_widget.merged_frame) if any(e in s for e in self.drawing_widget.selected_frames)), None)
-            matching_indices = [i for i, s in enumerate(self.drawing_widget.merged_frame) if any(e in self.drawing_widget.selected_frames for e in s)]
-            # Remove all matching sets from the list
-            for index in matching_indices:
-                self.drawing_widget.merged_frame.pop(index)
-            # if found_index is not None:
-            #     # If found, remove the existing set
-            #     self.drawing_widget.merged_frame.pop(found_index)
+            new_merged_frame = [s for i, s in enumerate(self.drawing_widget.merged_frame) if
+                                not any(e in self.drawing_widget.selected_frames for e in s)]
 
             # Append the new set
-            self.drawing_widget.merged_frame.append(self.drawing_widget.selected_frames)
+            new_merged_frame.append(self.drawing_widget.selected_frames)
+
+            # Update the merged_frame attribute
+            self.drawing_widget.merged_frame = new_merged_frame
 
             print("HanhLT: self.drawing_widget.merged_frame   ", self.drawing_widget.merged_frame)
 
@@ -191,6 +181,7 @@ class Tezt(QWidget):
         return [(i, j) for frame in self.drawing_widget.selected_frames for i in range(self.rows) for j in range(self.cols) if self.frames[i][j] is frame]
 
     def onComboIndexChanged(self, index):
+        self.drawing_widget.merged_frame.clear()
         selected_item = self.combo_box.currentText()
 
         # Clear the drawn rectangle
@@ -220,42 +211,130 @@ class Tezt(QWidget):
         # Update the size of the drawing widget based on the new grid size
         self.drawing_widget.setFixedSize(800, 600)
 
+class MenuGridType(QMenu):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.load_ui()
+
+    def load_ui(self):
+        # create layout
+        self.layout = QVBoxLayout()
+        self.layout.setAlignment(Qt.AlignTop)
+
+        custom_widget = QWidget(self)
+        self.custom_layout = QVBoxLayout()
+        # Create items for the list
+        items = [
+            {"title": "Item 1", "image_path": "IMG1"},
+            {"title": "Item 2", "image_path": "IMG2"},
+            {"title": "Item 3", "image_path": "IMG3"},
+            {"title": "Item 4", "image_path": "IMG4"},
+            {"title": "Item 5", "image_path": "IMG5"},
+            {"title": "Item 6", "image_path": "IMG6"},
+            {"title": "Item 7", "image_path": "IMG7"},
+            {"title": "Item 8", "image_path": "IMG8"},
+            {"title": "Item 9", "image_path": "IMG9"},
+            {"title": "Item 10", "image_path": "IMG10"},
+            {"title": "Item 11", "image_path": "IMG11"},
+        ]
+
+        self.label_standard = QLabel("Standard Window Division")
+        self.label_wide = QLabel("Wide Window Division")
+        self.label_custom = QLabel("Custom Window Division")
+
+        self.grid_standard = QGridLayout()
+        # Add items to the grid layout
+        row_standard, col_standard = 0, 0
+        for data in items:
+            item_widget = ItemGridType(data["title"], data["image_path"])
+            self.grid_standard.addWidget(item_widget, row_standard, col_standard)
+            col_standard += 1
+            if col_standard == 6:
+                col_standard = 0
+                row_standard += 1
+
+        self.grid_wide = QGridLayout()
+        row_wide, col_wide = 0, 0
+        for data in items:
+            item_widget = ItemGridType(data["title"], data["image_path"])
+            self.grid_wide.addWidget(item_widget, row_wide, col_wide)
+            col_wide += 1
+            if col_wide == 6:
+                col_wide = 0
+                row_wide += 1
+
+        self.button_edit_grid = QPushButton("Edit")
+        self.button_edit_grid.clicked.connect(self.show_dialog)
+
+        self.custom_layout.addWidget(self.label_standard)
+        self.custom_layout.addLayout(self.grid_standard)
+        self.custom_layout.addWidget(self.label_wide)
+        self.custom_layout.addLayout(self.grid_wide)
+        self.custom_layout.addWidget(self.label_custom)
+        self.custom_layout.addWidget(self.button_edit_grid)
+
+        custom_widget.setLayout(self.custom_layout)
+        # Create a QWidgetAction to add the custom widget to the QMenu
+        custom_action = QWidgetAction(self)
+        custom_action.setDefaultWidget(custom_widget)
+        self.addAction(custom_action)
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint | Qt.WindowType.Popup)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground, True)
+
+    def show_dialog(self):
+        self.dialog = Tezt()
+        self.dialog.show()
+
+class MainWindow(QMainWindow):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.load_ui()
+
+    def load_ui(self):
+        self.setFixedSize(1024, 768)
+
+        # Create a single main layout
+        main_layout = QVBoxLayout()
+
+        # Create a grid layout for the SelectableFrames
+        grid_layout = QGridLayout()
+        grid_layout.setSpacing(0)
+
+        # Create a SelectableFrame for each cell in the grid
+        for i in range(4):
+            for j in range(4):
+                frame = SelectableFrame(self)
+                frame.setFrameShape(QFrame.Panel)
+                grid_layout.addWidget(frame, i, j)
+
+        # Add the grid layout to the main layout
+        main_layout.addLayout(grid_layout)
+
+        self.menu_button = QPushButton("Grid")
+        self.menu_button.clicked.connect(self.show_menu)
+
+        # Add the menu button to the main layout
+        main_layout.addWidget(self.menu_button)
+
+        # Create a central widget and set the main layout on it
+        central_widget = QWidget()
+        central_widget.setLayout(main_layout)
+        self.setCentralWidget(central_widget)
+
+    def show_menu(self):
+        # Get the global position of the button
+        position = self.menu_button.mapToGlobal(self.menu_button.rect().bottomLeft())
+
+        # Create the menu and show it
+        menu = MenuGridType(self)
+        menu.exec_(position)
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = Tezt()
+    window = MainWindow()
     window.setWindowTitle('Grid with Selection and Drawing')
     # window.setGeometry(100, 100, 400, 400)
     window.show()
     sys.exit(app.exec())
-
-    # def mergeSelected(self):
-    #     if len(self.drawing_widget.selected_frames) >= 2:
-    #         # Find the minimum and maximum row and column indices of selected frames
-    #         min_row = min(row for row, _ in self.drawing_widget.selected_frames)
-    #         max_row = max(row for row, _ in self.drawing_widget.selected_frames)
-    #         min_col = min(col for _, col in self.drawing_widget.selected_frames)
-    #         max_col = max(col for _, col in self.drawing_widget.selected_frames)
-    #
-    #         # Calculate the total size of the merged frame
-    #         total_rows = max_row - min_row + 1
-    #         total_cols = max_col - min_col + 1
-    #
-    #         # Create the merged frame
-    #         merged_frame = SelectableFrame()
-    #
-    #         # Add the merged frame to the grid layout
-    #         self.drawing_widget.grid_layout.addWidget(
-    #             merged_frame, min_row, min_col, total_rows, total_cols
-    #         )
-    #
-    #         # Remove the selected frames from the grid layout
-    #         for frame in self.drawing_widget.selected_frames:
-    #             frame_widget = self.drawing_widget.grid_layout.itemAtPosition(*frame).widget()
-    #             frame_widget.setParent(None)
-    #
-    #         # Clear the set of selected frames
-    #         self.drawing_widget.selected_frames.clear()
-    #         self.drawing_widget.selected_frames.add((min_row, min_col))
-    #
-    #         # Update the UI
-    #         self.drawing_widget.update()

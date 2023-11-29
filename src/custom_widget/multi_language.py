@@ -28,7 +28,7 @@ class MainWindow(QMainWindow):
         self.mylabel.setAlignment(Qt.AlignCenter)
 
         pygame.mixer.init()
-        self.audio_file = "/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/notifi.mp3"
+        self.audio_file = "/assets/notifi.mp3"
 
         self.label_1 = QLabel(self.tr("This is a QLabel 1"))
         self.button_1 = QPushButton(self.tr("Press me 1"))

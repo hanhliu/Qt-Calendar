@@ -34,7 +34,7 @@ class ImageDrawApp(QMainWindow):
 
 
         self.points = []
-        self.load_image("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/login_b.png")  # Replace with the path to your image
+        self.load_image("/assets/login_b.png")  # Replace with the path to your image
         self.image_label.setPixmap(QPixmap.fromImage(self.qimage))
 
     def enable_drawing(self):

@@ -60,7 +60,7 @@ class CustomDialog(QDialog):
         # event name
         self.title_name_label = QLabel(f"{self.title}")
         self.title_name_label.setStyleSheet(f"color: white; font-weight: bold")
-        close_icon = QIcon("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/left.png")
+        close_icon = QIcon("/assets/left.png")
         self.close_button = QPushButton(close_icon, "")
         self.close_button.setIconSize(QSize(15, 15))
         self.close_button.setFixedSize(30, 30)

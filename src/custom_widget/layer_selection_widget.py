@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QPushButton, QVBoxLayout, QApplication, QListWidge
 from PySide6.QtGui import QStandardItemModel, QStandardItem, QIcon, Qt, QDrag
 from PySide6 import QtCore
 
-PATH = os.path.join('.', 'assets')
+PATH = os.path.join('..', 'assets')
 print('LayerSelector Loaded with path:', PATH)
 
 

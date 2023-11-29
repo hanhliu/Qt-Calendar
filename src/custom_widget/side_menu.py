@@ -1,7 +1,6 @@
-from PySide6.QtGui import QImage, QPixmap, QIcon, QGuiApplication
-from PySide6.QtCore import Qt, QThread, QSize, QCoreApplication
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QHBoxLayout
-from src.layer_selection_widget import LayersSelectorWidget
+from PySide6.QtGui import QGuiApplication
+from PySide6.QtWidgets import QWidget, QVBoxLayout
+from src.custom_widget.layer_selection_widget import LayersSelectorWidget
 
 class LeftSideMenu(QWidget):
     def __init__(self, parent=None):
