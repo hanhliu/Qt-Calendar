@@ -9,7 +9,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QP
 from PySide6.QtGui import QImage, QPixmap
 from PySide6.QtCore import Qt, QTimer, QRect, QPoint, QRectF
 
-from draw_shape_model import DrawShapModel, ArrowModel, ShapeType
+
 
 
 class CameraApp(QMainWindow):

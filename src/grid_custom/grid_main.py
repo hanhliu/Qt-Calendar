@@ -54,10 +54,10 @@ class MenuGridType(QMenu):
                 col_standard = 0
                 row_standard += 1
 
-        self.grid_custom = QGridLayout()
-        row_wide, col_wide = 0, 0
-        item_widget = ItemGridType("Edit", "EDIT", type_division="GRID_CUSTOM")
-        self.grid_custom.addWidget(item_widget, row_wide, col_wide)
+        # self.grid_custom = QGridLayout()
+        # row_wide, col_wide = 0, 0
+        # item_widget = ItemGridType("Edit", "EDIT", type_division="GRID_CUSTOM")
+        # self.grid_custom.addWidget(item_widget, row_wide, col_wide)
 
         self.button_edit_grid = QPushButton("Edit")
         self.button_edit_grid.clicked.connect(self.show_dialog)
@@ -65,7 +65,7 @@ class MenuGridType(QMenu):
         self.custom_layout.addWidget(self.label_standard)
         self.custom_layout.addLayout(self.grid_standard)
         self.custom_layout.addWidget(self.label_custom)
-        self.custom_layout.addLayout(self.grid_custom)
+        # self.custom_layout.addLayout(self.grid_custom)
         self.custom_layout.addWidget(self.button_edit_grid)
 
         custom_widget.setLayout(self.custom_layout)

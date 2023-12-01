@@ -1,3 +1,5 @@
+import math
+
 from PySide6.QtCore import Qt, QRect
 from PySide6.QtGui import QPainter, QPen, QColor
 from PySide6.QtWidgets import QWidget, QGridLayout
@@ -6,7 +8,7 @@ from src.grid_custom.selectable_frame import SelectableFrame
 
 
 class DrawingWidget(QWidget):
-    def __init__(self,size_grid=4):
+    def __init__(self, size_grid=9):
         super().__init__()
         self.paint_borders = False
         self.testFlag = False
@@ -16,8 +18,9 @@ class DrawingWidget(QWidget):
         self.grid_layout.setSpacing(0)
 
         # Create a SelectableFrame for each cell in the grid
-        for i in range(self.size_grid):
-            for j in range(self.size_grid):
+        sqrt_size = int(math.sqrt(self.size_grid))
+        for i in range(sqrt_size):
+            for j in range(sqrt_size):
                 frame = SelectableFrame(self)
                 self.grid_layout.addWidget(frame, i, j)
 
@@ -25,6 +28,10 @@ class DrawingWidget(QWidget):
         self.selection_end = None
         self.selected_frames = set()  # Use a set to store the row and column indices of selected frames
         self.merged_frame = []
+
+    def set_grid_size(self, grid_size):
+        self.size_grid = grid_size
+        self.update()
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
