@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QGridLayout, QFrame, QVBoxLay
 from PyQt5.QtGui import QPainter, QColor, QPen
 from PyQt5.QtCore import Qt, QRect
 
-from src.grid_custom.item_list_widget import ItemGridType
+from src.grid_custom.item_list_in_menu import ItemGridType
 
 
 class SelectableFrame(QFrame):

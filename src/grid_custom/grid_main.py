@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QApplication, QWidget, QGridLayout, QFrame, QVBoxL
 from PySide6.QtCore import Qt, QRect,Signal
 
 from src.grid_custom.dialog_tezt import DialogTezt
-from src.grid_custom.item_list_widget import ItemGridType
+from src.grid_custom.item_list_in_menu import ItemGridType
 from src.grid_custom.selectable_frame import SelectableFrame
 
 
@@ -91,89 +91,91 @@ class MainGrid(QWidget):
         self.load_ui()
 
     def load_ui(self):
-        self.setFixedSize(1024, 768)
-        # Create the menu and show it
-        self.menu = MenuGridType(self)
-        self.menu.sizeSelected.connect(self.update_grid_size)
+        # self.setFixedSize(1024, 768)
+        # # Create the menu and show it
+        # self.menu = MenuGridType(self)
+        # self.menu.sizeSelected.connect(self.update_grid_size)
 
         # Create a single main layout
         self.main_layout = QVBoxLayout()
 
-        # Create a grid layout for the SelectableFrames
-        self.grid_layout = QGridLayout()
-        self.grid_layout.setSpacing(0)
+        # # Create a grid layout for the SelectableFrames
+        # self.grid_layout = QGridLayout()
+        # self.grid_layout.setSpacing(0)
+        #
+        # # Create a SelectableFrame for each cell in the grid
+        # for i in range(4):
+        #     for j in range(4):
+        #         frame = SelectableFrame(self)
+        #         self.grid_layout.addWidget(frame, i, j)
+        #
+        # # Add the grid layout to the main layout
+        # self.main_layout.addLayout(self.grid_layout)
+        #
+        # self.menu_button = QPushButton("Grid")
+        # self.menu_button.clicked.connect(self.show_menu)
 
-        # Create a SelectableFrame for each cell in the grid
-        for i in range(4):
-            for j in range(4):
-                frame = SelectableFrame(self)
-                self.grid_layout.addWidget(frame, i, j)
-
-        # Add the grid layout to the main layout
-        self.main_layout.addLayout(self.grid_layout)
-
-        self.menu_button = QPushButton("Grid")
-        self.menu_button.clicked.connect(self.show_menu)
+        self.dialog_test = DialogTezt()
 
         # Add the menu button to the main layout
-        self.main_layout.addWidget(self.menu_button)
+        self.main_layout.addWidget(self.dialog_test)
 
         # Create a central widget and set the main layout on it
         self.setLayout(self.main_layout)
 
-    def update_grid_size(self, size):
-
-        # Clear the existing grid layout
-        for i in reversed(range(self.grid_layout.count())):
-            item = self.grid_layout.takeAt(i)
-            if item.widget():
-                item.widget().deleteLater()
-
-        sqrt_size = int(math.sqrt(size))
-        if sqrt_size * sqrt_size != size:
-            if size == 6:
-                self.create_grid_layout(3, 0, 0, 2, [(0, 0), (0, 1), (1, 0), (1, 1)])
-            elif size == 8:
-                self.create_grid_layout(4, 0, 0, 3, [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)])
-            elif size == 13:
-                self.create_grid_layout(4, 1, 1, 2, [(1, 1), (1, 2), (2, 1), (2, 2)])
-        else:
-            # Create a new grid layout with the updated size
-            for i in range(sqrt_size):
-                for j in range(sqrt_size):
-                    frame = SelectableFrame(self)
-                    self.grid_layout.addWidget(frame, i, j)
-
-        # Update the main layout
-        # self.setLayout(self.main_layout)
-        self.update()
-
-    def create_grid_layout(self, size, rows_start, cols_start, span, excluded_positions=None):
-        # Create the largest item and add it to the grid layout
-        largest_item = SelectableFrame(self)
-        self.grid_layout.addWidget(largest_item, rows_start, cols_start, span, span)
-
-        # Create items surrounding the largest item
-        for row in range(size):
-            for col in range(size):
-                if (row, col) in excluded_positions:
-                    continue  # Skip the specified positions
-                item = SelectableFrame(self)
-                self.grid_layout.addWidget(item, row, col)
-
-    def show_menu(self):
-        # Get the global position of the button
-        position = self.menu_button.mapToGlobal(self.menu_button.rect().bottomLeft())
-        self.menu.exec_(position)
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-
-        # Draw the grid frames
-        for i in range(self.grid_layout.count()):
-            frame = self.grid_layout.itemAt(i).widget()
-            rect = frame.geometry()
-            row, col, _, _ = self.grid_layout.getItemPosition(i)
-            painter.setPen(QPen(QColor(0, 0, 0), 2))
-            painter.drawRect(rect)
+    # def update_grid_size(self, size):
+    #
+    #     # Clear the existing grid layout
+    #     for i in reversed(range(self.grid_layout.count())):
+    #         item = self.grid_layout.takeAt(i)
+    #         if item.widget():
+    #             item.widget().deleteLater()
+    #
+    #     sqrt_size = int(math.sqrt(size))
+    #     if sqrt_size * sqrt_size != size:
+    #         if size == 6:
+    #             self.create_grid_layout(3, 0, 0, 2, [(0, 0), (0, 1), (1, 0), (1, 1)])
+    #         elif size == 8:
+    #             self.create_grid_layout(4, 0, 0, 3, [(0, 0), (0, 1), (0, 2), (1, 0), (1, 1), (1, 2), (2, 0), (2, 1), (2, 2)])
+    #         elif size == 13:
+    #             self.create_grid_layout(4, 1, 1, 2, [(1, 1), (1, 2), (2, 1), (2, 2)])
+    #     else:
+    #         # Create a new grid layout with the updated size
+    #         for i in range(sqrt_size):
+    #             for j in range(sqrt_size):
+    #                 frame = SelectableFrame(self)
+    #                 self.grid_layout.addWidget(frame, i, j)
+    #
+    #     # Update the main layout
+    #     # self.setLayout(self.main_layout)
+    #     self.update()
+    #
+    # def create_grid_layout(self, size, rows_start, cols_start, span, excluded_positions=None):
+    #     # Create the largest item and add it to the grid layout
+    #     largest_item = SelectableFrame(self)
+    #     self.grid_layout.addWidget(largest_item, rows_start, cols_start, span, span)
+    #
+    #     # Create items surrounding the largest item
+    #     for row in range(size):
+    #         for col in range(size):
+    #             if (row, col) in excluded_positions:
+    #                 continue  # Skip the specified positions
+    #             item = SelectableFrame(self)
+    #             self.grid_layout.addWidget(item, row, col)
+    #
+    # def show_menu(self):
+    #     # Get the global position of the button
+    #     position = self.menu_button.mapToGlobal(self.menu_button.rect().bottomLeft())
+    #     self.menu.exec_(position)
+    #
+    # def paintEvent(self, event):
+    #     painter = QPainter(self)
+    #
+    #     # Draw the grid frames
+    #     for i in range(self.grid_layout.count()):
+    #         frame = self.grid_layout.itemAt(i).widget()
+    #         rect = frame.geometry()
+    #         row, col, _, _ = self.grid_layout.getItemPosition(i)
+    #         painter.setPen(QPen(QColor(0, 0, 0), 2))
+    #         painter.drawRect(rect)
 

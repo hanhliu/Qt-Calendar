@@ -3,6 +3,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow, QComboBox, QLabel, QVBo
 from PySide6.QtCore import QDate
 
 from src.grid_custom.grid_main import MainGrid
+from src.grid_custom.grid_main_two import MainGridTwo
 
 
 class MyMainWindow(QMainWindow):
@@ -14,7 +15,7 @@ class MyMainWindow(QMainWindow):
         self.setWindowTitle('Custom Grid')
 
         layout = QVBoxLayout()
-        self.mainwindow = MainGrid()
+        self.mainwindow = MainGridTwo()
         layout.addWidget(self.mainwindow)
 
         central_widget = QWidget()
