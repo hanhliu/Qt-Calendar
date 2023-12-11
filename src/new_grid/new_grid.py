@@ -1,6 +1,8 @@
 import os
 import sys
-from PySide6.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout, QGridLayout, QPushButton
+
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout, QGridLayout, QPushButton, QLabel
 
 from grid_layout import GridWidget
 
@@ -22,6 +24,7 @@ class NewGrid(QMainWindow):
         largest_item = QWidget()
         largest_item.setStyleSheet('background-color: lightblue;')
         grid_layout.addWidget(largest_item, 1, 1, 2, 2)  # Span 3 rows and 3 columns, starting from row 1 and column 1
+        self.add_position_label(largest_item, 1, 1)
 
         # Twelve items surrounding the largest item
         for row in range(0, 4):
@@ -31,14 +34,19 @@ class NewGrid(QMainWindow):
                 item = QWidget()
                 item.setStyleSheet('background-color: lightblue;')
                 grid_layout.addWidget(item, row, col)
+                # self.add_position_label(item, row, col)
 
         self.central_layout.addLayout(grid_layout)
 
         self.central_widget.setLayout(self.central_layout)
         self.setCentralWidget(self.central_widget)
 
-    def merge_cell(self):
-        pass
+    def add_position_label(self, item, row, col):
+        if row == 1 and col == 1:  # Add label only to the largest item
+            label = QLabel(f"Position: ({row}, {col})")
+            label.setAlignment(Qt.AlignCenter)
+            layout = QVBoxLayout(item)
+            layout.addWidget(label)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

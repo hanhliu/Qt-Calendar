@@ -11,7 +11,9 @@ class QLabelWidget(QWidget):
         self.label = label_content
         self.setWindowTitle("Drop Target")
         self.layout = QVBoxLayout()
-        self.setFixedSize(200, 100)
+        # self.setStyleSheet('background-color: lightblue;')
+        # self.layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.label = QLabel(self.label)
         self.layout.addWidget(self.label)
         self.setLayout(self.layout)
@@ -32,6 +34,7 @@ class QLabelWidget(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
+        self.setGeometry(100, 100, 800, 600)
         self.load_ui()
 
     def load_ui(self):
@@ -67,6 +70,7 @@ class MainWindow(QMainWindow):
 
         # Create the tree view and set the model
         tree_view = QTreeView()
+        tree_view.setFixedHeight(200)
         tree_view.setModel(self.model)
 
         # Connect the signals for dragging
@@ -89,11 +93,34 @@ class MainWindow(QMainWindow):
         tree_view.pressed.connect(start_drag)
 
         grid_layout = QGridLayout()
-        # Create the target QWidget (QLabelWidget)
-        for row in range(4):
-            for col in range(4):
-                label = QLabelWidget(f"Item {row} {col}")
-                grid_layout.addWidget(label, row, col)
+        grid_layout.setSpacing(1)
+        # Largest item in the center
+
+        ex_list = [{(0, 0), (0, 1), (1, 0), (1, 1)}, {(0, 3), (0, 2), (1, 2), (1, 3)}]
+        all_excluded_positions = set.union(*ex_list)
+        # Create items surrounding the largest_item
+        for list_tuple in ex_list:
+            min_row = min(row for row, _ in list_tuple)
+            min_col = min(col for _, col in list_tuple)
+            max_row = max(row for row, _ in list_tuple)
+            max_col = max(col for _, col in list_tuple)
+
+            row_span = max_row - min_row + 1
+            col_span = max_col - min_col + 1
+            largest_item = QLabelWidget(f"Large {min_row} {min_col}")
+            largest_item.setStyleSheet('background-color: lightblue;')
+            grid_layout.addWidget(largest_item, min_row, min_col, row_span, col_span)
+
+            for row in range(4):
+                for col in range(4):
+                    if (row, col) in all_excluded_positions:
+                        continue  # Skip the specified positions
+                    label = QLabelWidget(f"Item {row} {col}")
+                    label.setStyleSheet('background-color: lightblue;')
+                    grid_layout.addWidget(label, row, col)
+
+        position = grid_layout.getItemPosition(2)
+        print("HanhLT: position   ", position)
 
         grid_widget = QWidget()
         grid_widget.setLayout(grid_layout)
@@ -105,26 +132,6 @@ class MainWindow(QMainWindow):
         mai_widget.setLayout(main_layout)
         mai_widget.show()
         self.setCentralWidget(mai_widget)
-
-        # Example usage
-        my_dict = {1: 'apple', 2: 'banana', 3: 'orange', 6: 'peach'}
-        # self.handle_drop_event(my_dict, 1, 'grape')  # Case 1
-        # self.handle_drop_event(my_dict, 3, 'peach')  # Case 2
-        # self.handle_drop_event(my_dict, 7, 'kiwi')  # Case 3
-
-        my_list = ["cherry", "avocado", "coconut"]
-        for value in my_list:
-            key = self.find_smallest_available_key(my_dict)
-            my_dict[key] = value
-
-        print(my_dict)
-
-    def find_smallest_available_key(self, dictionary):
-        keys = list(dictionary.keys())
-        smallest_key = 1
-        while smallest_key in keys:
-            smallest_key += 1
-        return smallest_key
 
     def handle_drop_event(self, dictionary, current_key, new_value):
         keys = list(dictionary.keys())
