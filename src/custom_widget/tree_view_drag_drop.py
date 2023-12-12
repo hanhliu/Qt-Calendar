@@ -97,6 +97,7 @@ class MainWindow(QMainWindow):
         # Largest item in the center
 
         ex_list = [{(0, 0), (0, 1), (1, 0), (1, 1)}, {(0, 3), (0, 2), (1, 2), (1, 3)}]
+        # ex_list = [{(2, 1), (2, 2), (1, 2), (1, 1)}]
         all_excluded_positions = set.union(*ex_list)
         # Create items surrounding the largest_item
         for list_tuple in ex_list:
@@ -110,17 +111,36 @@ class MainWindow(QMainWindow):
             largest_item = QLabelWidget(f"Large {min_row} {min_col}")
             largest_item.setStyleSheet('background-color: lightblue;')
             grid_layout.addWidget(largest_item, min_row, min_col, row_span, col_span)
+            largest_item_index = grid_layout.indexOf(largest_item)
+            row_large, col_large, row_span, col_span = grid_layout.getItemPosition(largest_item_index)
+            print(f"Largest item is at position: ({row_large}, {col_large}) with span ({row_span} rows, {col_span} columns) and  index {largest_item_index}")
 
-            for row in range(4):
-                for col in range(4):
-                    if (row, col) in all_excluded_positions:
-                        continue  # Skip the specified positions
-                    label = QLabelWidget(f"Item {row} {col}")
-                    label.setStyleSheet('background-color: lightblue;')
-                    grid_layout.addWidget(label, row, col)
+        for row in range(4):
+            for col in range(4):
+                if (row, col) in all_excluded_positions:
+                    continue  # Skip the specified positions
+                label = QLabelWidget(f"Item {row} {col}")
+                label.setStyleSheet('background-color: lightblue;')
+                grid_layout.addWidget(label, row, col)
 
-        position = grid_layout.getItemPosition(2)
-        print("HanhLT: position   ", position)
+                item_index = grid_layout.indexOf(label)
+                roww, coll, row_spann, col_spann = grid_layout.getItemPosition(item_index)
+                print(
+                    f"Item child: ({roww}, {coll}) with span ({row_spann} rows, {col_spann} columns and index {item_index})")
+
+        for index in range(13):
+            item = grid_layout.itemAt(index)
+            row, col, row_span, col_span = grid_layout.getItemPosition(index)
+
+            # Now you have information about the item and its position
+            print(f"Item at position ({row}, {col}) with span ({row_span} rows, {col_span} columns)")
+
+            # Access the widget associated with the item
+            widget = item.widget()
+
+            # Do something with the widget, if needed
+            if widget is not None:
+                print("HanhLT: widget  ", widget)
 
         grid_widget = QWidget()
         grid_widget.setLayout(grid_layout)
