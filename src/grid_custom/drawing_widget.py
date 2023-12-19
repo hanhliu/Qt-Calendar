@@ -16,9 +16,10 @@ class DrawingWidget(QWidget):
         self.testFlag = False
         self.color_rectangle_select = QColor(255, 0, 0)
         self.row, self.column = data_model.row, data_model.column
-        self.setFixedSize(800, 600)
+        self.setFixedSize(600, 450)
         self.grid_layout = QGridLayout(self)
         self.grid_layout.setSpacing(0)
+        self.grid_layout.setContentsMargins(0, 0, 0, 0)
 
         self.create_grid()
 

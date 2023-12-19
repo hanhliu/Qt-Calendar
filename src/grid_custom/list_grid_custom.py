@@ -14,7 +14,7 @@ class ListGridCustom(QListView):
         super().__init__(parent)
         self.divisions_list = divisions_list
         self.today_index = None
-        self.setFixedWidth(240)
+        self.setFixedWidth(180)
         self.list_grid_custom: List[ItemGridModel] = []
         self.load_ui()
 
@@ -29,9 +29,19 @@ class ListGridCustom(QListView):
         self.set_style_sheet()
 
     def item_clicked(self, index):
-        item: ItemGridCustom = self.list_view_model.itemFromIndex(index)
-        self.signal_item_click.emit(item.model)
-        item.on_item_click()
+        clicked_item: ItemGridCustom = self.list_view_model.itemFromIndex(index)
+        self.signal_item_click.emit(clicked_item.model)
+
+        # Handle visibility of state_choose for each item in the list
+        for row in range(self.list_view_model.rowCount()):
+            item = self.list_view_model.item(row, 0)
+            item_widget = self.indexWidget(self.list_view_model.indexFromItem(item))
+
+            if item_widget:
+                if item == clicked_item:
+                    item.state_choose.setVisible(True)
+                else:
+                    item.state_choose.setVisible(False)
     def set_style_sheet(self):
         pass
         # self.setStyleSheet("QListView { background-color: transparent; }")
@@ -63,7 +73,14 @@ class ListGridCustom(QListView):
         for item_model in list_items:
             item = ItemGridCustom(model=item_model)
             self.list_view_model.appendRow(item)
-            # self.setIndexWidget(self.list_view_model.indexFromItem(item), item.main_widget)
+            self.setIndexWidget(self.list_view_model.indexFromItem(item), item.main_widget)
+
         if self.list_view_model.rowCount() > 0:
             index_to_select = self.list_view_model.index(0, 0)
             self.setCurrentIndex(index_to_select)
+            current_item = self.list_view_model.itemFromIndex(index_to_select)
+            if current_item:
+                current_item_widget = self.indexWidget(index_to_select)
+                if current_item_widget:
+                    current_item.state_choose.setVisible(True)
+

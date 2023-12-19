@@ -130,6 +130,20 @@ class MainGridTwo(QWidget):
         self.menu_button = QPushButton("Grid")
         self.menu_button.clicked.connect(self.show_menu)
 
+        # self.item_divisions = [
+        #     ItemGridModel(name=f"6 Divisions", data=[{(0, 1), (1, 0), (1, 1), (0, 0)}], row=3, column=3, grid_count=6),
+        #     ItemGridModel(name=f"8 Divisions",
+        #                   data=[{(0, 1), (1, 2), (2, 1), (0, 0), (1, 1), (2, 0), (0, 2), (2, 2), (1, 0)}], row=4,
+        #                   column=4, grid_count=8),
+        #     ItemGridModel(name=f"10 Divisions",
+        #                   data=[{(0, 1), (1, 0), (1, 1), (0, 0)}, {(1, 2), (0, 2), (0, 3), (1, 3)}], row=4, column=4,
+        #                   grid_count=10),
+        #     ItemGridModel(name=f"13 Divisions", data=[{(1, 1), (1, 2), (2, 1), (2, 2)}], row=4, column=4, grid_count=13)
+        # ]
+        #
+        # self.dialog = DialogTezt(list_divisions=self.item_divisions)
+        # self.main_layout.addWidget(self.dialog)
+
         # Add the menu button to the main layout
         self.main_layout.addWidget(self.menu_button)
 

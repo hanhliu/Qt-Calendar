@@ -95,8 +95,9 @@ class MainWindow(QMainWindow):
         grid_layout = QGridLayout()
         grid_layout.setSpacing(1)
         # Largest item in the center
+        ex_list = [{(0, 0), (0, 1), (1, 0), (1, 1)}, {(2, 2), (2, 3), (3, 2), (3, 3)}]
 
-        ex_list = [{(0, 0), (0, 1), (1, 0), (1, 1)}, {(0, 3), (0, 2), (1, 2), (1, 3)}]
+        # ex_list = [{(0, 0), (0, 1), (1, 0), (1, 1)}, {(0, 3), (0, 2), (1, 2), (1, 3)}]
         # ex_list = [{(2, 1), (2, 2), (1, 2), (1, 1)}]
         all_excluded_positions = set.union(*ex_list)
         # Create items surrounding the largest_item
@@ -106,41 +107,73 @@ class MainWindow(QMainWindow):
             max_row = max(row for row, _ in list_tuple)
             max_col = max(col for _, col in list_tuple)
 
-            row_span = max_row - min_row + 1
-            col_span = max_col - min_col + 1
-            largest_item = QLabelWidget(f"Large {min_row} {min_col}")
-            largest_item.setStyleSheet('background-color: lightblue;')
-            grid_layout.addWidget(largest_item, min_row, min_col, row_span, col_span)
-            largest_item_index = grid_layout.indexOf(largest_item)
-            row_large, col_large, row_span, col_span = grid_layout.getItemPosition(largest_item_index)
-            print(f"Largest item is at position: ({row_large}, {col_large}) with span ({row_span} rows, {col_span} columns) and  index {largest_item_index}")
+            largest_item_rows = max_row - min_row + 1
+            largest_item_cols = max_col - min_col + 1
+
+            # all_excluded_positions = set.union(*excluded_positions)
+
+            # Create items in the grid
+            for row in range(4):
+                for col in range(4):
+                    if (row, col) == (min_row, min_col):
+                        # Add the largest item
+                        largest_item = QLabelWidget(f"Large {row} {col}")
+                        largest_item.setStyleSheet('background-color: lightblue;')
+                        grid_layout.addWidget(largest_item, row, col, largest_item_rows, largest_item_cols)
 
         for row in range(4):
             for col in range(4):
                 if (row, col) in all_excluded_positions:
-                    continue  # Skip the specified positions
+                    continue  # Skip positions covered by largest items
                 label = QLabelWidget(f"Item {row} {col}")
                 label.setStyleSheet('background-color: lightblue;')
                 grid_layout.addWidget(label, row, col)
 
-                item_index = grid_layout.indexOf(label)
-                roww, coll, row_spann, col_spann = grid_layout.getItemPosition(item_index)
-                print(
-                    f"Item child: ({roww}, {coll}) with span ({row_spann} rows, {col_spann} columns and index {item_index})")
+        # Create a list to store widgets and their positions
+        widget_positions = []
 
-        for index in range(13):
+        # Populate the list with widgets and their positions
+        for index in range(grid_layout.count()):
             item = grid_layout.itemAt(index)
             row, col, row_span, col_span = grid_layout.getItemPosition(index)
+            widget_positions.append((item.widget(), row, col, row_span, col_span))
+            print("HanhLT: item  ", item, "  item.widget() ", item.widget())
 
-            # Now you have information about the item and its position
-            print(f"Item at position ({row}, {col}) with span ({row_span} rows, {col_span} columns)")
+        # Sort the list based on positions
+        widget_positions.sort(key=lambda x: (x[1], x[2]))
 
-            # Access the widget associated with the item
-            widget = item.widget()
+        # Clear the existing widgets from the layout
+        for i in reversed(range(grid_layout.count())):
+            widget = grid_layout.itemAt(i).widget()
+            grid_layout.removeWidget(widget)
+            widget.setParent(None)
 
-            # Do something with the widget, if needed
-            if widget is not None:
-                print("HanhLT: widget  ", widget)
+        # Rearrange widgets in the layout
+        for new_index, (widget, row, col, row_span, col_span) in enumerate(widget_positions):
+            grid_layout.addWidget(widget, row, col, row_span, col_span)
+
+            # Optionally, set row and column stretch to manage spacing
+            grid_layout.setRowStretch(row, 1)
+            grid_layout.setColumnStretch(col, 1)
+
+        # Update the layout
+        grid_layout.update()
+
+        print("HanhLT: self.get_index( grid_layout)  ", self.get_index(1, 3, grid_layout))
+
+        # for index in range(grid_layout.count()):
+        #     item = grid_layout.itemAt(index)
+        #     row, col, row_span, col_span = grid_layout.getItemPosition(index)
+        #
+        #     # Now you have information about the item and its position
+        #     print(f"Grid count {grid_layout.count()}   Item at position ({row}, {col}) with span ({row_span} rows, {col_span} columns) with index {index}")
+        #
+        #     # Access the widget associated with the item
+        #     widget = item.widget()
+        #     #
+        #     # # Do something with the widget, if needed
+        #     # if widget is not None:
+        #     #     print("HanhLT: widget  ", widget)
 
         grid_widget = QWidget()
         grid_widget.setLayout(grid_layout)
@@ -152,6 +185,21 @@ class MainWindow(QMainWindow):
         mai_widget.setLayout(main_layout)
         mai_widget.show()
         self.setCentralWidget(mai_widget)
+
+    def get_index(self, target_row, target_col, grid):
+        for index in range(grid.count()):
+            item = grid.itemAt(index)
+            row, col, row_span, col_span = grid.getItemPosition(index)
+
+            # Check if the target position is within the span of the item
+            if (
+                    row <= target_row < row + row_span
+                    and col <= target_col < col + col_span
+            ):
+                return index
+        # If no item is found within the span, calculate the index
+        index_calculated = target_row * grid.columnCount() + target_col
+        return index_calculated
 
     def handle_drop_event(self, dictionary, current_key, new_value):
         keys = list(dictionary.keys())
