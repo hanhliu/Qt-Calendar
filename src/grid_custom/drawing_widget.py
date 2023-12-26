@@ -54,6 +54,12 @@ class DrawingWidget(QWidget):
         self.create_grid()
         self.update()
 
+    def update_data_model(self, data_model):
+        self.data_model = data_model
+        self.merged_frame = data_model.data
+        self.create_grid()
+        self.update()
+
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:
             self.testFlag = True
@@ -99,6 +105,7 @@ class DrawingWidget(QWidget):
 
     def mergeSelected(self):
         if len(self.selected_frames) >= 2 and not self.testFlag:
+            print("HanhLT: self.selected_frames  ", self.selected_frames, "  self.merged_frame  ", self.merged_frame)
             new_merged_frame = [s for i, s in enumerate(self.merged_frame) if
                                 not any(e in self.selected_frames for e in s)]
             # Append the new set

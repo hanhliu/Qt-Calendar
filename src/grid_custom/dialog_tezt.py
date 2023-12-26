@@ -3,8 +3,9 @@ import math
 from PySide6.QtGui import QColor, QIcon
 from PySide6.QtWidgets import QVBoxLayout, QComboBox, QPushButton, QHBoxLayout, QDialog, QWidget, QFrame, QLineEdit, \
     QLabel, QSpinBox
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, Signal
 
+from src.common_controller.common_qsettings import CommonQSettings
 from src.grid_custom.drawing_widget import DrawingWidget
 from src.grid_custom.item_grid_model import ItemGridModel
 from src.grid_custom.list_grid_custom import ListGridCustom, ItemGridCustom
@@ -12,6 +13,7 @@ from src.grid_custom.selectable_frame import SelectableFrame
 
 
 class DialogTezt(QDialog):
+    signal_save_trigger = Signal(object)
     def __init__(self, parent=None, list_divisions=None):
         super().__init__(parent)
         self.setModal(False)
@@ -99,7 +101,6 @@ class DialogTezt(QDialog):
         self.title_bar_layout.addWidget(self.title_name_label, 90)
         self.title_bar_layout.addWidget(self.close_button, 10)
         self.title_bar_widget.setLayout(self.title_bar_layout)
-
 
     def load_ui_list_grid(self):
         self.layout_top = QHBoxLayout()
@@ -194,8 +195,6 @@ class DialogTezt(QDialog):
         self.layout_top.addLayout(layout_title, 20)
         self.layout_top.addLayout(self.layout_spinbox, 80)
 
-
-
     def load_ui_grid_custom(self):
         self.layout_right_content = QHBoxLayout()
         self.layout_right_content.setContentsMargins(0, 0, 0, 0)
@@ -253,11 +252,6 @@ class DialogTezt(QDialog):
         self.new_model = ItemGridModel(data=data[0], grid_count=data[1], row=data[2], column=data[3])
 
         self.update_current_model(data=data[0], grid_count=data[1], new_row=data[2], new_column=data[3])
-        for idx, i in enumerate(self.list_item_grid.divisions_list):
-            print("HanhLT: data init ",idx, "   ", i.data)
-
-        for idxx, j in enumerate(self.list_item_grid.list_grid_custom):
-            print("HanhLT: data edit  ", idxx, "   ", j.data)
 
     def handle_value_row_change(self, new_value):
         self.rows = new_value
@@ -288,15 +282,23 @@ class DialogTezt(QDialog):
         item.label_name_grid.setText(name)
 
     def on_handle_save_data(self):
-
+        for item in self.list_item_grid.divisions_list:
+            print("HanhLT: item.data = ", item.data, "  item.grid_count = ",item.grid_count)
+        CommonQSettings.get_instance().save_data_grid(self.list_item_grid.divisions_list)
+        self.signal_save_trigger.emit(self.list_item_grid.divisions_list)
         self.close()
-        model_current_item: ItemGridModel = self.get_current_item_model()
 
     def on_handle_cancel_change(self):
         self.close()
 
     def on_handle_reset_to_default(self):
-        pass
+        CommonQSettings.get_instance().clear_all()
+        new_list = CommonQSettings.get_instance().get_data_grid()
+        self.list_item_grid.update_grid_items(new_list)
+        self.current_model = self.get_current_item_model()
+        self.columns_spinbox.setValue(self.current_model.column)
+        self.rows_spinbox.setValue(self.current_model.row)
+        self.drawing_widget.update_data_model(self.current_model)
 
     def get_current_item_model(self):
         # Get the current selected index

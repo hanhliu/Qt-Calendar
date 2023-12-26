@@ -84,3 +84,13 @@ class ListGridCustom(QListView):
                 if current_item_widget:
                     current_item.state_choose.setVisible(True)
 
+    def update_grid_items(self, new_divisions_list):
+        # Clear existing items
+        self.list_view_model.clear()
+        self.list_grid_custom = []
+
+        # Update data
+        self.divisions_list = new_divisions_list
+
+        # Populate the grid with new data
+        self.populate_grid_item()

@@ -2,12 +2,12 @@ from typing import List, Tuple, Set
 
 
 class ItemGridModel:
-    name: str = None
-    data: List[Set[Tuple[int, int]]] = None
-    grid_count: int = None
-    row: int = None
-    column: int = None
-    image_url: str = None
+    # name: str = None
+    # data: List[Set[Tuple[int, int]]] = None
+    # grid_count: int = None
+    # row: int = None
+    # column: int = None
+    # image_url: str = None
 
     def __init__(self, name=None, data=None, grid_count=None, row=None, column=None, image_url=None):
         self.name = name
