@@ -91,7 +91,7 @@ class MainGrid(QWidget):
         self.load_ui()
 
     def load_ui(self):
-        self.setFixedSize(1024, 768)
+        self.setFixedSize(1024, 576)
         # Create the menu and show it
         self.menu = MenuGridType(self)
         self.menu.sizeSelected.connect(self.update_grid_size)
@@ -104,8 +104,8 @@ class MainGrid(QWidget):
         self.grid_layout.setSpacing(0)
 
         # Create a SelectableFrame for each cell in the grid
-        for i in range(4):
-            for j in range(4):
+        for i in range(8):
+            for j in range(7):
                 frame = SelectableFrame(self)
                 self.grid_layout.addWidget(frame, i, j)
 

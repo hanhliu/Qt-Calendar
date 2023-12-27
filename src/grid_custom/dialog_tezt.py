@@ -10,7 +10,7 @@ from src.grid_custom.list_grid_custom import ListGridCustom
 from src.grid_custom.selectable_frame import SelectableFrame
 
 
-class DialogTezt(QWidget):
+class DialogTezt(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.data = []

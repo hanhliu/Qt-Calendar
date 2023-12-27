@@ -1,8 +1,56 @@
 import os
 import sys
-from PySide6.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout, QGridLayout, QPushButton
+
+from PySide6.QtCore import Qt, QMimeData
+from PySide6.QtGui import QDrag, QDropEvent, QDragEnterEvent
+from PySide6.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout, QGridLayout, QPushButton, QLabel, \
+    QStackedWidget
 
 from grid_layout import GridWidget
+
+class ItemGrid(QStackedWidget):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.load_ui()
+        self.setAcceptDrops(True)
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            item_grid = self.childAt(event.position().toPoint())
+            print(" item_grid = ", item_grid)
+            if isinstance(item_grid, QLabel):
+                # Start the drag operation
+                drag = QDrag(self)
+                mime_data = QMimeData()
+                mime_data.setText(item_grid.text())
+                drag.setMimeData(mime_data)
+                # Execute the drag operation
+                drag.exec()
+
+    def mouseMoveEvent(self, event):
+        if not (event.buttons() & Qt.LeftButton):
+            return
+
+        mime_data = QMimeData()
+        drag = QDrag(self)
+        drag.setMimeData(mime_data)
+        drag.setHotSpot(event.position())
+
+        drop_action = drag.exec(Qt.MoveAction)
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        event.acceptProposedAction()
+
+    def dropEvent(self, event: QDropEvent):
+        if event.mimeData().hasText():
+            dropped_text = event.mimeData().text()
+            print(f"Item Dropped: {dropped_text}")
+            event.acceptProposedAction()
+
+    def load_ui(self):
+        self.label = QLabel()
+        self.setStyleSheet('background-color: lightblue;')
+        self.addWidget(self.label)
 
 
 class NewGrid(QMainWindow):
@@ -11,159 +59,74 @@ class NewGrid(QMainWindow):
         self.load_ui()
 
     def load_ui(self):
-        self.setGeometry(500, 100, 800, 600)
         self.central_widget = QWidget()
+        self.central_widget.setFixedSize(1024, 576)
         self.central_layout = QVBoxLayout()
+        self.central_layout.setContentsMargins(0, 0, 0, 0)
 
         grid_layout = QGridLayout()
         grid_layout.setSpacing(1)
+        grid_layout.setContentsMargins(0, 0, 0, 0)
 
-        # Largest item in the center
-        largest_item = QWidget()
-        largest_item.setStyleSheet('background-color: lightblue;')
-        grid_layout.addWidget(largest_item, 1, 1, 2, 2)  # Span 3 rows and 3 columns, starting from row 1 and column 1
+        array_custom = [
+            {(0, 1), (1, 0), (1, 1), (0, 0)}
+        ]
 
-        # Twelve items surrounding the largest item
-        for row in range(0, 4):
-            for col in range(0, 4):
-                if row == 1 and col == 1:
-                    continue  # Skip the center item
-                item = QWidget()
-                item.setStyleSheet('background-color: lightblue;')
-                grid_layout.addWidget(item, row, col)
+        new_data = []
+        for item in array_custom:
+            list_to_tuple = set()
+            if isinstance(item, list):
+                for list_item in item:
+                    list_to_tuple.add(tuple(list_item))
+                new_data.append(set(list_to_tuple))
+            else:
+                new_data.append(set(item))
+
+        all_excluded_positions = set.union(*new_data)
+
+        # Get the number of rows and columns in the grid
+        rows = 4
+        cols = 4
+
+        # Calculate the width and height of each cell
+        cell_width = int((self.central_widget.width()-1) / cols)
+        cell_height = int((self.central_widget.height()-1) / rows)
+
+        # Create items surrounding the largest_item
+        for row in range(rows):
+            for col in range(cols):
+                if (row, col) in all_excluded_positions:
+                    continue  # Skip the specified positions
+
+                camera_frame_small = ItemGrid()
+                camera_frame_small.label.setText(f"row - {row}, col - {col}")
+                camera_frame_small.setFixedSize(cell_width, cell_height)
+                grid_layout.addWidget(camera_frame_small, row, col)
+
+        # Create items based on new_data
+        for list_tuple in new_data:
+            min_row = min(row for row, _ in list_tuple)
+            min_col = min(col for _, col in list_tuple)
+            max_row = max(row for row, _ in list_tuple)
+            max_col = max(col for _, col in list_tuple)
+
+            row_span = max_row - min_row + 1
+            col_span = max_col - min_col + 1
+
+            item_width = col_span * cell_width
+            item_height = row_span * cell_height
+
+            largest_item = ItemGrid()
+            largest_item.label.setText("Largest Item")
+            largest_item.setFixedSize(item_width, item_height)
+            grid_layout.addWidget(largest_item, min_row, min_col, row_span, col_span)
 
         self.central_layout.addLayout(grid_layout)
-
         self.central_widget.setLayout(self.central_layout)
         self.setCentralWidget(self.central_widget)
-
-    def merge_cell(self):
-        pass
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = NewGrid()
     window.show()
     sys.exit(app.exec())
-
-'''13 item with 1 biggest item in center'''
-# # Largest item in the center
-# largest_item = QWidget()
-# largest_item.setStyleSheet('background-color: lightblue;')
-# grid_layout.addWidget(largest_item, 1, 1, 3, 3)  # Span 3 rows and 3 columns, starting from row 1 and column 1
-#
-# # Twelve items surrounding the largest item
-# for row in range(0, 5):
-#     for col in range(0, 5):
-#         if row == 1 and col == 1:
-#             continue  # Skip the center item
-#         item = QWidget()
-#         item.setStyleSheet('background-color: lightblue;')
-#         grid_layout.addWidget(item, row, col)
-
-# '''8 item with 1 item biggest'''
-# # Large item
-# large_item = QWidget()
-# large_item.setStyleSheet('background-color: lightblue;')
-# grid_layout.addWidget(large_item, 0, 0, 3, 3)  # Span 3 rows and 3 columns
-#
-# # Three items below the large item
-# item_below_1 = QWidget()
-# item_below_1.setStyleSheet('background-color: lightblue;')
-# item_below_2 = QWidget()
-# item_below_2.setStyleSheet('background-color: lightblue;')
-# item_below_3 = QWidget()
-# item_below_3.setStyleSheet('background-color: lightblue;')
-# grid_layout.addWidget(item_below_1, 3, 0)
-# grid_layout.addWidget(item_below_2, 3, 1)
-# grid_layout.addWidget(item_below_3, 3, 2)
-#
-# # Four items to the right of the large item
-# item_right_1 = QWidget()
-# item_right_1.setStyleSheet('background-color: lightblue;')
-# item_right_2 = QWidget()
-# item_right_2.setStyleSheet('background-color: lightblue;')
-# item_right_3 = QWidget()
-# item_right_3.setStyleSheet('background-color: lightblue;')
-# item_right_4 = QWidget()
-# item_right_4.setStyleSheet('background-color: lightblue;')
-# grid_layout.addWidget(item_right_1, 0, 3)
-# grid_layout.addWidget(item_right_2, 1, 3)
-# grid_layout.addWidget(item_right_3, 2, 3)
-# grid_layout.addWidget(item_right_4, 3, 3)
-#
-# '''6 item with 1 item biggest'''
-# # Large item
-# large_item = QWidget()
-# large_item.setStyleSheet('background-color: lightblue;')
-# grid_layout.addWidget(large_item, 0, 0, 2, 2)  # Span 2 rows and 2 columns
-#
-# # Two items below the large item
-# item_below_1 = QWidget()
-# item_below_1.setStyleSheet('background-color: lightblue;')
-# item_below_2 = QWidget()
-# item_below_2.setStyleSheet('background-color: lightblue;')
-# grid_layout.addWidget(item_below_1, 2, 0)
-# grid_layout.addWidget(item_below_2, 2, 1)
-#
-# # Three items to the right of the large item
-# item_right_1 = QWidget()
-# item_right_1.setStyleSheet('background-color: lightblue;')
-# item_right_2 = QWidget()
-# item_right_2.setStyleSheet('background-color: lightblue;')
-# item_right_3 = QWidget()
-# item_right_3.setStyleSheet('background-color: lightblue;')
-# grid_layout.addWidget(item_right_1, 0, 2)
-# grid_layout.addWidget(item_right_2, 1, 2)
-# grid_layout.addWidget(item_right_3, 2, 2)
-
-'''6 item with 2 item biggest'''
-# # Two largest items in the center
-# largest_item_1 = QWidget()
-# largest_item_1.setStyleSheet('background-color: lightblue;')
-# largest_item_2 = QWidget()
-# largest_item_2.setStyleSheet('background-color: lightblue;')
-# grid_layout.addWidget(largest_item_1, 0, 0, 2, 2)  # Span 2 rows and 2 columns, starting from row 0 and column 0
-# grid_layout.addWidget(largest_item_2, 0, 2, 2, 2)  # Span 2 rows and 2 columns, starting from row 0 and column 2
-#
-# # Four items below the two largest items
-# item_below_1 = QWidget()
-# item_below_1.setStyleSheet('background-color: lightblue;')
-# item_below_2 = QWidget()
-# item_below_2.setStyleSheet('background-color: lightblue;')
-# item_below_3 = QWidget()
-# item_below_3.setStyleSheet('background-color: lightblue;')
-# item_below_4 = QWidget()
-# item_below_4.setStyleSheet('background-color: lightblue;')
-# grid_layout.addWidget(item_below_1, 2, 0)  # Starting from row 2 and column 0
-# grid_layout.addWidget(item_below_2, 2, 1)  # Starting from row 2 and column 1
-# grid_layout.addWidget(item_below_3, 2, 2)  # Starting from row 2 and column 2
-# grid_layout.addWidget(item_below_4, 2, 3)  # Starting from row 2 and column 3
-
-'''7 item with 4 bigger item'''
-# # Four biggest items in a 2x2 grid
-# biggest_item_1 = QWidget()
-# biggest_item_1.setStyleSheet('background-color: lightblue;')
-# biggest_item_2 = QWidget()
-# biggest_item_2.setStyleSheet('background-color: lightblue;')
-# biggest_item_3 = QWidget()
-# biggest_item_3.setStyleSheet('background-color: lightblue;')
-# biggest_item_4 = QWidget()
-# biggest_item_4.setStyleSheet('background-color: lightblue;')
-#
-# grid_layout.addWidget(biggest_item_1, 0, 0)  # Row 0, Column 0
-# grid_layout.addWidget(biggest_item_2, 0, 1)  # Row 0, Column 1
-# grid_layout.addWidget(biggest_item_3, 1, 0)  # Row 1, Column 0
-# grid_layout.addWidget(biggest_item_4, 1, 1)  # Row 1, Column 1
-#
-# # Three items to the right of the biggest items
-# right_item_1 = QWidget()
-# right_item_1.setStyleSheet('background-color: lightblue;')
-# right_item_2 = QWidget()
-# right_item_2.setStyleSheet('background-color: lightblue;')
-# right_item_3 = QWidget()
-# right_item_3.setStyleSheet('background-color: lightblue;')
-#
-# grid_layout.addWidget(right_item_1, 0, 2)  # Row 0, Column 2
-# grid_layout.addWidget(right_item_2, 1, 2)  # Row 1, Column 2
-# grid_layout.addWidget(right_item_3, 2, 2)  # Row 2, Column 2
