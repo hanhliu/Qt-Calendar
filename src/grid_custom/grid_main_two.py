@@ -125,7 +125,7 @@ class MainGridTwo(QWidget):
         self.load_ui()
 
     def load_ui(self):
-        self.setFixedSize(1024, 768)
+        self.setFixedSize(800, 768)
         # Create the menu and show it
         self.menu = MenuGridType(self)
         self.menu.signal_emit_size.connect(self.update_grid_size)
