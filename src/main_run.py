@@ -1,21 +1,9 @@
 from PySide6.QtCore import Qt, QSize, QEvent
-from PySide6.QtGui import QPalette, QIcon
 from PySide6.QtSvgWidgets import QSvgWidget
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QToolButton, QStyle, QMainWindow, QVBoxLayout, QApplication
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QMainWindow, QVBoxLayout, QApplication
 
-class ButtonTitleBar(QToolButton):
-    def __init__(self, parent=None, svg_path=None):
-        super().__init__(parent)
-        self.svg_path = svg_path
-        self.load_ui()
+from src.custom_title_new.widget.button_title_bar import ButtonTitleBar
 
-    def load_ui(self):
-        self.setIcon(QIcon(self.svg_path))
-        self.setStyleSheet('''
-            QToolButton { 
-                background-color: transparent; 
-            }
-        ''')
 
 class CustomTitleBar(QWidget):
     def __init__(self, parent):

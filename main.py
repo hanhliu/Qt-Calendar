@@ -1,98 +1,131 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QSplitter, QTextEdit, QWidget, QVBoxLayout, QPushButton
+from PySide6 import QtCore
+from PySide6.QtCore import QPoint
+from PySide6.QtWidgets import QWidget, QSplitter, QTextEdit, QVBoxLayout, QToolButton, QApplication, QSizePolicy
 
 
-class MyMainWindow(QMainWindow):
+class Window(QWidget):
     def __init__(self):
         super().__init__()
+        self.mouse_pressed = False
+        self.is_collapse1 = True
+        self.is_collapse = True
         self.splitter = QSplitter(self)
-        self.splitter.setChildrenCollapsible(False)
-        self.splitter.setStyleSheet("QSplitter::handle { background-color: #99aabb; }")
-        self.splitter.setHandleWidth(1)
 
-        # Create two widgets
-        self.widget1 = QTextEdit("Widget 1")
+        widget1 = QTextEdit("Widget 1")
         widget2 = QTextEdit("Widget 2")
         widget3 = QTextEdit("Widget 3")
+        widget3.setMaximumWidth(200)
+        widget3.setMinimumWidth(100)
 
-        # Calculate the maximum width for widget1 (30% of the total width)
-        total_width = self.width()
-        max_width_widget1 = int(total_width * 0.4)
-        min_width_widget1 = int(total_width * 0.2)
+        # Set size policies
+        # widget1.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        # widget2.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        widget3.setSizePolicy(QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.MinimumExpanding)
 
-        # Set maximum width for widget1
-        self.widget1.setMaximumWidth(max_width_widget1)
-        self.widget1.setMinimumWidth(min_width_widget1)
-
-        widget3.setMaximumWidth(max_width_widget1)
-        widget3.setMinimumWidth(min_width_widget1)
-
-        # Create a button to toggle the sidebar visibility
-        self.toggle_sidebar_button = QPushButton("T")
-        self.toggle_sidebar_button.setFixedWidth(10)
-        self.toggle_sidebar_button.clicked.connect(self.toggle_sidebar)
-
-        # Create a container widget for the button
-        button_container_widget = QWidget(self.splitter)
-        button_container_widget.setFixedWidth(10)
-        button_container_widget.setMinimumWidth(10)
-        button_layout = QVBoxLayout(button_container_widget)
-        button_layout.setContentsMargins(0, 0, 0, 0)
-        button_layout.addWidget(self.toggle_sidebar_button)
-
-        # Create a button to toggle the sidebar visibility
-        self.toggle_eventbar_button = QPushButton("T")
-        self.toggle_eventbar_button.setFixedWidth(10)
-        self.toggle_eventbar_button.clicked.connect(self.toggle_event_bar)
-
-        # Create a container widget for the button
-        widget_button_event_bar = QWidget(self.splitter)
-        widget_button_event_bar.setFixedWidth(10)
-        widget_button_event_bar.setMinimumWidth(10)
-        button_event_bar_layout = QVBoxLayout(widget_button_event_bar)
-        button_event_bar_layout.setContentsMargins(0, 0, 0, 0)
-        button_event_bar_layout.addWidget(self.toggle_eventbar_button)
-
-        # Add widgets to the splitter
-        self.splitter.addWidget(self.widget1)
-        self.splitter.addWidget(button_container_widget)
+        self.splitter.addWidget(widget1)
         self.splitter.addWidget(widget2)
-        self.splitter.addWidget(widget_button_event_bar)
         self.splitter.addWidget(widget3)
 
-        self.splitter.setStretchFactor(0, 2)  # 20%
-        self.splitter.setStretchFactor(1, 1)
-        self.splitter.setStretchFactor(2, 5)  # 80%
-        self.splitter.setStretchFactor(3, 1)  # 80%
-        self.splitter.setStretchFactor(4, 2)  # 80%
+        # self.splitter.setChildrenCollapsible(False)
+        self.splitter.splitterMoved.connect(self.handle_splitter_moved)
 
-        # Set the main layout
-        layout = QVBoxLayout()
+
+
+        layout = QVBoxLayout(self)
         layout.addWidget(self.splitter)
+        self.handle = self.splitter.handle(1)
 
-        main_widget = QWidget()
-        main_widget.setLayout(layout)
-        self.setCentralWidget(main_widget)
-        self.showMaximized()
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.button = QToolButton(self.handle)
+        self.button.setArrowType(QtCore.Qt.LeftArrow)
+        self.button.clicked.connect(
+            lambda: self.handleSplitterButton(True))
+        self.button.mouseMoveEvent = self.mouse_move_event
+        layout.addWidget(self.button)
+        self.handle.setLayout(layout)
 
-    def toggle_sidebar(self):
-        # Toggle the visibility of the sidebar
-        is_visible = not self.splitter.widget(0).isVisible()
-        self.splitter.widget(0).setVisible(is_visible)
+        handle2 = self.splitter.handle(2)
 
-        # Update the splitter handle
-        self.splitter.handle(0).setEnabled(is_visible)
-
-    def toggle_event_bar(self):
-        # Toggle the visibility of the sidebar
-        is_visible = not self.splitter.widget(4).isVisible()
-        self.splitter.widget(4).setVisible(is_visible)
-
-        # Update the splitter handle
-        self.splitter.handle(3).setEnabled(is_visible)
+        layout2 = QVBoxLayout()
+        layout2.setContentsMargins(0, 0, 0, 0)
+        button3 = QToolButton(handle2)
+        button3.setArrowType(QtCore.Qt.RightArrow)
+        button3.clicked.connect(
+            lambda: self.handleSplitterButtonff(True))
+        layout2.addWidget(button3)
+        handle2.setLayout(layout2)
 
 
-if __name__ == "__main__":
-    app = QApplication([])
-    window = MyMainWindow()
+    def mouse_move_event(self, event):
+        # global_position = self.button.mapToGlobal(event.pos())
+        # Get the position of the button
+        button_pos = self.button.mapToGlobal(event.position())
+
+        # Get the position of the handle
+        handle_pos = self.handle.mapToGlobal(self.handle.rect().center())
+
+        # Calculate the movement
+        move_delta = button_pos.x() - handle_pos.x()
+
+        # Update the position of the handle
+        new_x = handle_pos.x() + move_delta
+        new_pos = QPoint(new_x, handle_pos.y())
+
+        # Convert QPoint to int
+        int_pos = int(new_pos.x())
+        self.splitter.moveSplitter(int_pos, 1)
+
+        # Update the position of the handle
+        new_pos = self.handle.mapFromGlobal(QPoint(handle_pos.x() + move_delta, handle_pos.y()))
+
+        # self.handle.move(new_pos)
+        # self.handle.pos()
+        print(f"HanhLT: event position = {int_pos}")
+        pass
+    
+    def handle_splitter_moved(self, pos, index):
+        print(f"HanhLT: pos = {pos}")
+        sizes = self.splitter.sizes()
+        if self.mouse_pressed and index == 1 and sizes[0] < 100:  # Handle 1 and size smaller than 100
+            print(f"HanhLT: chay vao day")
+            sizes[0] = 0
+            self.splitter.setSizes(sizes)
+
+    def handleSplitterButton(self, left=True):
+        if not all(self.splitter.sizes()):
+            if self.splitter.sizes()[2] == 0:
+                if self.splitter.sizes()[0] == 0:
+                    self.splitter.setSizes([1, 5, 0])
+                else:
+                    self.splitter.setSizes([0, 6, 0])
+            else:
+                self.splitter.setSizes([1, 4, 1])
+        elif left:
+            self.splitter.setSizes([0, 5, 1])
+        else:
+            self.splitter.setSizes([1, 4, 1])
+
+    def handleSplitterButtonff(self, left=True):
+        if not all(self.splitter.sizes()):
+            if self.splitter.sizes()[0] == 0:
+                if self.splitter.sizes()[2] == 0:
+                    self.splitter.setSizes([0, 5, 1])
+                else:
+                    self.splitter.setSizes([0, 6, 0])
+            else:
+                self.splitter.setSizes([1, 4, 1])
+        elif left:
+            self.splitter.setSizes([1, 5, 0])
+        else:
+            self.splitter.setSizes([1, 4, 1])
+
+
+if __name__ == '__main__':
+
+    import sys
+    app = QApplication(sys.argv)
+    window = Window()
+    window.showMaximized()
     window.show()
-    app.exec()
+    sys.exit(app.exec())

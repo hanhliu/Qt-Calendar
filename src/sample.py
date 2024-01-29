@@ -1,65 +1,72 @@
-from PySide6.QtWidgets import QApplication, QMainWindow, QSplitter, QTextEdit, QWidget, QVBoxLayout, QPushButton, \
-    QSizePolicy
+import os
+import sys
+
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QWidget, QMainWindow, QApplication, QVBoxLayout, QGridLayout, QPushButton, QLabel, \
+    QSizePolicy, QStackedWidget, QTextEdit, QStackedLayout
 
 
-class MyMainWindow(QMainWindow):
+class NewGrid(QMainWindow):
     def __init__(self):
-        super().__init__()
+        QMainWindow.__init__(self)
+        self.load_ui()
 
-        self.splitter = QSplitter(self)
+    def load_ui(self):
+        self.root_stacked_widget = QStackedWidget()
+        test_widget = QTextEdit()
+        test_widget.setStyleSheet('background-color: lightblue;')
+        # self.root_stacked_widget.addWidget(test_widget)
+        # #  self.root_stackedwidget.widget(0).hide() để mắt người không thấy được hiệu ứng resize frame
+        # self.root_stacked_widget.widget(0).hide()
+        self.root_stacked_widget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        self.root_layout = QVBoxLayout()
+        self.showMaximized()
 
-        # Create widgets for the main area and sidebar
-        main_widget = QTextEdit("Main Area")
-        sidebar_widget = QTextEdit("Sidebar")
+        grid_layout = QGridLayout()
+        grid_layout.setSpacing(1)
 
-        # Add widgets to the splitter
-        self.splitter.addWidget(main_widget)
+        # Twelve items surrounding the largest item
+        for row in range(0, 3):
+            for col in range(0, 3):
+                camera_frame = QTextEdit()
+                # camera_frame.setFixedSize(40, 30)
+                # camera_frame.setStyleSheet('background-color: lightblue;')
+                root_camera_widget = QStackedWidget()
+                root_camera_widget.setFixedSize(40, 30)
+                root_camera_widget.addWidget(camera_frame)
+                grid_layout.addWidget(root_camera_widget, row, col)
+        camera_frame = QTextEdit()
+        camera_frame.setStyleSheet('background-color: red;')
+        self.root_layout.addLayout(grid_layout)
 
-        # Create a button to toggle the sidebar visibility
-        self.toggle_sidebar_button = QPushButton("Toggle Sidebar")
-        self.toggle_sidebar_button.clicked.connect(self.toggle_sidebar)
+        # Get the size of each item in the grid
+        for row in range(0, 3):
+            for col in range(0, 3):
+                item = grid_layout.itemAtPosition(row, col)
+                if item is not None:
+                    stacked_widget = item.widget()
+                    if isinstance(stacked_widget, QStackedWidget):
+                        # Get the current widget from the QStackedWidget
+                        current_widget = stacked_widget.currentWidget()
+                        if current_widget is not None:
+                            item_size = current_widget.size()
 
-        # Create a container widget for the button
-        button_container_widget = QWidget(self.splitter)
-        button_layout = QVBoxLayout(button_container_widget)
-        button_layout.addWidget(self.toggle_sidebar_button)
+                            print(
+                                f"HanhLT: Size of item at position ({row}, {col}): {item_size.width()} x {item_size.height()}")
+        widget = QWidget()
+        widget.setLayout(self.root_layout)
+        self.root_stacked_widget.addWidget(widget)
 
-        # Set the minimum size for the button container widget
-        # Set the minimum size policy for the button container widget
-        button_container_widget.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Minimum)
+        temp_layout = QVBoxLayout()
+        temp_layout.addWidget(self.root_stacked_widget)
 
-        # Add the container widget to the splitter
-        self.splitter.addWidget(button_container_widget)
-
-        # Set the sidebar widget as the second widget in the splitter
-        self.splitter.addWidget(sidebar_widget)
-
-        # Set stretch factors (main area takes 80%, button container takes 20%, sidebar takes 0%)
-        self.splitter.setStretchFactor(0, 8)  # 80%
-        self.splitter.setStretchFactor(1, 2)  # 20%
-        self.splitter.setStretchFactor(2, 0)  # 0%
-
-        # Set the main layout
-        layout = QVBoxLayout()
-        layout.addWidget(self.splitter)
-
-        main_container_widget = QWidget()
-        main_container_widget.setLayout(layout)
-        self.setCentralWidget(main_container_widget)
-
-        self.setGeometry(100, 100, 800, 600)
-
-    def toggle_sidebar(self):
-        # Toggle the visibility of the sidebar
-        is_visible = not self.splitter.widget(2).isVisible()
-        self.splitter.widget(2).setVisible(is_visible)
-
-        # Update the splitter handle
-        self.splitter.handle(1).setEnabled(is_visible)
+        temp_widget = QWidget()
+        temp_widget.setLayout(temp_layout)
+        self.setCentralWidget(temp_widget)
 
 
 if __name__ == "__main__":
-    app = QApplication([])
-    window = MyMainWindow()
+    app = QApplication(sys.argv)
+    window = NewGrid()
     window.show()
-    app.exec()
+    sys.exit(app.exec())
