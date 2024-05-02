@@ -1,7 +1,7 @@
 import sys
 
 from PySide6.QtWidgets import QApplication, QTreeView, QLabel, QWidget, QVBoxLayout, QGridLayout, QMainWindow
-from PySide6.QtCore import Qt, QMimeData,QByteArray, QDataStream, QIODevice
+from PySide6.QtCore import Qt, QMimeData, QByteArray, QDataStream, QIODevice, QEvent
 from PySide6.QtGui import QDrag,  QStandardItemModel, QStandardItem
 
 
@@ -69,28 +69,31 @@ class MainWindow(QMainWindow):
         subchild_item.appendRow(sub_subchild_item4)
 
         # Create the tree view and set the model
-        tree_view = QTreeView()
-        tree_view.setFixedHeight(200)
-        tree_view.setModel(self.model)
+        self.tree_view = QTreeView()
+        self.tree_view.setObjectName("treevieww")
+        self.tree_view.installEventFilter(self)
+        self.tree_view.setFixedHeight(200)
+        self.tree_view.setModel(self.model)
 
         # Connect the signals for dragging
         def start_drag(index):
             item = self.model.itemFromIndex(index)
             if item is not None and item.isDragEnabled():
-                drag = QDrag(tree_view)
+                drag = QDrag(self.tree_view)
                 mime_data = QMimeData()
                 mime_data.setText(item.text())
                 drag.setMimeData(mime_data)
                 drag.exec(Qt.CopyAction)
 
-        tree_view.viewport().setAcceptDrops(True)
-        tree_view.setDragEnabled(True)
-        tree_view.setDragDropMode(QTreeView.DragOnly)
-        tree_view.setSelectionMode(QTreeView.SingleSelection)
-        tree_view.setSelectionBehavior(QTreeView.SelectRows)
-        tree_view.setDragDropOverwriteMode(False)
-        tree_view.setDropIndicatorShown(True)
-        tree_view.pressed.connect(start_drag)
+
+        self.tree_view.viewport().setAcceptDrops(True)
+        self.tree_view.setDragEnabled(True)
+        self.tree_view.setDragDropMode(QTreeView.DragOnly)
+        self.tree_view.setSelectionMode(QTreeView.SingleSelection)
+        self.tree_view.setSelectionBehavior(QTreeView.SelectRows)
+        self.tree_view.setDragDropOverwriteMode(False)
+        self.tree_view.setDropIndicatorShown(True)
+        self.tree_view.pressed.connect(start_drag)
 
         grid_layout = QGridLayout()
         grid_layout.setSpacing(1)
@@ -137,7 +140,6 @@ class MainWindow(QMainWindow):
             item = grid_layout.itemAt(index)
             row, col, row_span, col_span = grid_layout.getItemPosition(index)
             widget_positions.append((item.widget(), row, col, row_span, col_span))
-            print("HanhLT: item  ", item, "  item.widget() ", item.widget())
 
         # Sort the list based on positions
         widget_positions.sort(key=lambda x: (x[1], x[2]))
@@ -159,8 +161,6 @@ class MainWindow(QMainWindow):
         # Update the layout
         grid_layout.update()
 
-        print("HanhLT: self.get_index( grid_layout)  ", self.get_index(1, 3, grid_layout))
-
         # for index in range(grid_layout.count()):
         #     item = grid_layout.itemAt(index)
         #     row, col, row_span, col_span = grid_layout.getItemPosition(index)
@@ -177,14 +177,26 @@ class MainWindow(QMainWindow):
 
         grid_widget = QWidget()
         grid_widget.setLayout(grid_layout)
+        grid_widget.setObjectName("grid")
+        grid_widget.installEventFilter(self)
 
         main_layout = QVBoxLayout()
-        main_layout.addWidget(tree_view)
+        main_layout.addWidget(self.tree_view)
         main_layout.addWidget(grid_widget)
         mai_widget = QWidget()
         mai_widget.setLayout(main_layout)
-        mai_widget.show()
+        mai_widget.installEventFilter(self)
         self.setCentralWidget(mai_widget)
+
+    def eventFilter(self, obj, event):
+        if obj.objectName() == "treevieww":
+            if event.type() == QEvent.Type.MouseButtonPress:
+                print(f"HanhLT: press")
+        if obj.objectName() == "grid":
+            if event.type() == QEvent.Type.MouseButtonDblClick:
+                print(f"HanhLT: gridd")
+
+        return super().eventFilter(obj, event)
 
     def get_index(self, target_row, target_col, grid):
         for index in range(grid.count()):

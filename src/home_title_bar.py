@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QEvent
 from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QStackedWidget, QPushButton, \
     QStackedLayout, QSizePolicy
 
@@ -80,3 +80,16 @@ class HomeTitleBar(ActionableTitleBar):
 
         self.setLayout(self.layout)
 
+    def window_state_changed(self, state):
+        if state == Qt.WindowState.WindowMaximized:
+            self.normal_button.setVisible(True)
+            self.max_button.setVisible(False)
+        else:
+            self.normal_button.setVisible(False)
+            self.max_button.setVisible(True)
+
+    def changeEvent(self, event):
+        if event.type() == QEvent.Type.WindowStateChange:
+            self.window_state_changed(self.parent.window().windowState())
+        super().changeEvent(event)
+        event.accept()

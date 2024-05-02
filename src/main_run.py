@@ -2,7 +2,7 @@ from PySide6.QtCore import Qt, QSize, QEvent
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QLabel, QMainWindow, QVBoxLayout, QApplication
 
-from src.custom_title_new.widget.button_title_bar import ButtonTitleBar
+from custom_title_new.widget.button_title_bar import ButtonTitleBar
 
 
 class CustomTitleBar(QWidget):

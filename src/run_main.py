@@ -12,12 +12,12 @@ class MainWindow(QMainWindow):
         QMainWindow.__init__(self)
 
         self.resize(400, 200)
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint)
+
         central_widget = QWidget()
         self.title_bar = HomeTitleBar(parent=self)
 
         work_space_layout = QVBoxLayout()
-        work_space_layout.setContentsMargins(0, 0, 0, 0)
+        work_space_layout.setContentsMargins(0, -9, 0, 0)
         work_space_layout.addWidget(QLabel("Hello, World!", self))
         button1 = QPushButton("Button 1")
         button1.clicked.connect(self.button1_click)
@@ -31,7 +31,7 @@ class MainWindow(QMainWindow):
         work_space_layout.addWidget(button3)
 
         centra_widget_layout = QVBoxLayout()
-        centra_widget_layout.setContentsMargins(0, 0, 0, 0)
+        centra_widget_layout.setContentsMargins(0, -20, 0, 0)
         centra_widget_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         centra_widget_layout.addWidget(self.title_bar)
         centra_widget_layout.addLayout(work_space_layout)

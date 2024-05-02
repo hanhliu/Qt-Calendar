@@ -1,6 +1,9 @@
-from PySide6.QtCore import Qt, QEvent
+from PySide6.QtCore import Qt, QEvent, QSize
 from PySide6.QtWidgets import QApplication, QWidget, QTabBar, QVBoxLayout, QLabel, QPushButton, QTabWidget, QMainWindow, \
-    QHBoxLayout, QStackedLayout, QStackedWidget
+    QHBoxLayout, QStackedLayout, QStackedWidget, QSizePolicy, QLineEdit, QTextEdit
+
+from src.custom_title_new.widget.actionable_title_bar import ActionableTitleBar
+from src.custom_title_new.widget.button_title_bar import ButtonTitleBar
 
 
 class CustomTabBar(QTabBar):
@@ -84,62 +87,40 @@ class CustomTabWidget(QTabWidget):
 class TabBarExample(QMainWindow):
     def __init__(self):
         super().__init__()
+        # Create a set to store existing tab names
+        self.existing_tab_names = set()
+        # self.setWindowFlags(Qt.FramelessWindowHint)
+        self.setAttribute(Qt.WA_TranslucentBackground)
 
+        self.setWindowTitle('Frameless Window with Rounded Corners')
+        self.setStyleSheet("background-color: rgba(255, 255, 255, 200); border-radius: 10px;")
         self.setWindowTitle('QTabBar Example')
         self.setGeometry(100, 100, 400, 300)
 
-        # Create a QTabWidget
-        self.tab_widget = QTabWidget()
+        self.create_center_layout()
+        # self.create_left_side_layout()
+        # self.create_right_size_layout()
+        # self.create_layout_button_system()
 
         # Create a QStackedLayout to manage content widgets
-        self.stacked_layout = QStackedWidget()
+        self.stacked_widget = QStackedWidget()
 
         # Create a QVBoxLayout for the entire widget
         main_layout = QVBoxLayout()
 
-        # Create a QTabBar
-        self.tab_bar = self.tab_widget.tabBar()
-        self.tab_bar.setObjectName("tab_bar_custom")
-        self.tab_bar.setStyleSheet(
-            """
-            QTabBar::tab#tab_bar_custom {{
-                background-color: lightblue;
-                padding: 8px 12px;
-                font-weight: None;
-            }}
-            QTabBar::tab:selected#tab_bar_custom {{
-                border-top-left-radius: 4px;
-                border-top-right-radius: 4px;
-                background-color: lightblue;
-                font-weight: bold;
-            }}
-            QTabBar::close-button#tab_bar_custom {{
-                subcontrol-position: right;
-            }}
-            QTabBar::close-button:hover#tab_bar_custom {{
-                subcontrol-position: right;
-                border-radius: 2px;
-                font-weight: None;
-            }}
-            """
-        )
+        initial_tab_name = "Tab 1"
+        self.add_new_tab(self.tab_bar, self.stacked_widget, initial_tab_name)
+        self.add_new_tab(self.tab_bar, self.stacked_widget, "Tab 2")
+        self.tab_contents = {initial_tab_name}
 
-        # set tab bar can be closed
-        self.tab_widget.setTabsClosable(True)
-
-        # Connect the tabChanged signal to a custom slot
-        self.tab_bar.currentChanged.connect(self.tab_changed)
-
-        # Connect the tabCloseRequested signal to a custom slot
-        self.tab_bar.tabCloseRequested.connect(self.close_tab)
 
         # Add the QTabWidget to the main layout
-        main_layout.addWidget(self.tab_widget)
-        main_layout.addWidget(self.stacked_layout)
+        main_layout.addWidget(self.widget_tab_title)
+        main_layout.addWidget(self.stacked_widget)
 
         # Create a QPushButton for adding new tabs
         self.add_tab_button = QPushButton("+ Add Tab")
-        self.add_tab_button.clicked.connect(self.add_tab)
+        self.add_tab_button.clicked.connect(lambda: self.add_new_tab(self.tab_bar, self.stacked_widget))
 
         # Add the QPushButton to the main layout
         main_layout.addWidget(self.add_tab_button)
@@ -149,29 +130,185 @@ class TabBarExample(QMainWindow):
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
-    def tab_changed(self, index):
-        # Show the corresponding content widget when a tab is selected
-        self.stacked_layout.setCurrentIndex(index)
+    def create_left_side_layout(self):
+        self.widget_left = QWidget()
+        self.left_layout = QVBoxLayout()
+        self.search_bar = QLineEdit("Search")
+        self.treeview = QTextEdit("This is Tree View")
+        self.left_layout.addWidget(self.search_bar, 10)
+        self.left_layout.addWidget(self.treeview, 90)
+        self.widget_left.setLayout(self.left_layout)
 
-    def add_tab(self):
+    def create_right_size_layout(self):
+        self.widget_right = QWidget()
+        self.right_layout = QVBoxLayout()
+        self.eventbar = QTextEdit("This is Event Bar")
+        self.right_layout.addWidget(self.eventbar)
+        self.widget_right.setLayout(self.right_layout)
+
+    def create_center_layout(self):
+        # Create a QTabWidget
+        self.tab_widget = QTabWidget()
+        self.tab_widget.setMaximumHeight(self.tab_widget.tabBar().height())
+        self.tab_widget.tabBar().setStyleSheet("""
+             QTabBar {
+                alignment: left;
+            }
+
+            QTabBar::tab {
+                background-color: lightblue;
+                padding: 8px 12px;
+                font-weight: None;
+            }
+
+            QTabBar::tab:selected {
+                border-top-left-radius: 4px;
+                border-top-right-radius: 4px;
+                background-color: lightblue;
+                font-weight: bold;
+            }
+
+            QTabBar::close-button {
+                subcontrol-position: right;
+            }
+
+            QTabBar::close-button:hover {
+                subcontrol-position: right;
+                border-radius: 2px;
+                font-weight: None;
+            }""")
+        self.tab_widget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.tab_widget.setTabPosition(QTabWidget.TabPosition.North)
+        self.tab_widget.tabBar().setExpanding(False)
+        self.tab_widget.setMovable(False)
+        self.tab_widget.setTabsClosable(True)
+        self.tab_widget.setCornerWidget(QLabel("Corner"))
+        self.tab_widget.setStyleSheet("""
+            QTabWidget::tab-bar {
+                left: 0; 
+            }
+            QTabWidget::pane {
+                background: transparent;
+                border: none;
+            }
+        """)
+        self.tab_bar = self.tab_widget.tabBar()
+        self.tab_bar.currentChanged.connect(self.tab_changed)
+        # Connect the tabCloseRequested signal to a custom slot
+        self.tab_bar.tabCloseRequested.connect(self.close_tab)
+
+        self.widget_tab_title = ActionableTitleBar(self)
+        self.widget_tab_title.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        layout_tab_title = QVBoxLayout()
+        layout_tab_title.setContentsMargins(0, 0, 0, 0)
+        layout_tab_title.addWidget(self.tab_widget)
+        self.widget_tab_title.setLayout(layout_tab_title)
+
+    def create_layout_button_system(self):
+        self.layout_button_system = QHBoxLayout()
+        self.min_button = ButtonTitleBar(self, svg_path="/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/minimize_window.svg")
+
+        # Max button
+        self.max_button = ButtonTitleBar(self, svg_path="/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/maximize_window.svg")
+
+        # Close button
+        self.close_button = ButtonTitleBar(self, svg_path="/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/close.svg")
+        self.close_button.clicked.connect(self.window().close)
+
+        # Normal button
+        self.normal_button = ButtonTitleBar(self, svg_path="/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/normal_window.svg")
+        self.normal_button.setVisible(False)
+
+        # Settings button
+        self.settings_button = ButtonTitleBar(self, svg_path="/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/settings.svg")
+        #
+        # # Add buttons
+        buttons = [
+            self.settings_button,
+            self.min_button,
+            self.normal_button,
+            self.max_button,
+            self.close_button,
+        ]
+        self.layout_button_system.setAlignment(Qt.AlignmentFlag.AlignRight)
+        for button in buttons:
+            button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+            button.setFixedSize(QSize(28, 28))
+            self.layout_button_system.addWidget(button)
+
+
+    def add_new_tab(self, tab_bar, stack_widget, tab_name=None):
+        if tab_name is not None:
+            new_tab_name = tab_name
+        else:
+            # Create a unique tab name
+            new_tab_name = self.generate_unique_tab_name()
+
         # Add a new tab to the QTabWidget and create a corresponding content widget
-        new_tab_index = self.tab_bar.addTab(f"Tab {self.tab_bar.count() + 1}")
+        new_tab_index = tab_bar.addTab(new_tab_name)
 
         # Create a QLabel as the content for the new tab
-        new_content_widget = QLabel(f"Content of Tab {self.tab_bar.count()}")
+        new_content_widget = QLabel(f"Content of {new_tab_name}")
         new_content_widget.hide()
 
         # Store the content widget in the QStackedLayout
-        self.stacked_layout.addWidget(new_content_widget)
+        stack_widget.addWidget(new_content_widget)
+
+        # Show the corresponding content widget
+        stack_widget.setCurrentIndex(new_tab_index)
+
+        # Activate the newly added tab
+        tab_bar.setCurrentIndex(new_tab_index)
+
+    def tab_changed(self, index):
+        # Show the corresponding content widget when a tab is selected
+        self.stacked_widget.setCurrentIndex(index)
+
+    def add_tab(self):
+        # Create a unique tab name
+        new_tab_name = self.generate_unique_tab_name()
+
+        # Add a new tab to the QTabWidget and create a corresponding content widget
+        new_tab_index = self.tab_bar.addTab(new_tab_name)
+
+        # Create a QLabel as the content for the new tab
+        new_content_widget = QLabel(f"Content of {new_tab_name}")
+        new_content_widget.hide()
+
+        # Store the content widget in the QStackedLayout
+        self.stacked_widget.addWidget(new_content_widget)
 
         # Show the corresponding content widget
         self.tab_changed(new_tab_index)
 
+        # Activate the newly added tab
+        self.tab_bar.setCurrentIndex(new_tab_index)
+
     def close_tab(self, index):
-        # Remove the tab and its corresponding content widget
+        # Get the tab name from the tab bar
+        tab_name = self.tab_bar.tabText(index)
+        self.tab_contents.remove(tab_name) # Option
+        # Close the tab in the tab bar
         self.tab_bar.removeTab(index)
-        self.stacked_layout.removeWidget(self.stacked_layout.widget(index))
-        self.stacked_layout.setCurrentIndex(self.tab_bar.currentIndex())
+
+        self.stacked_widget.removeWidget(self.stacked_widget.widget(index))
+        self.stacked_widget.setCurrentIndex(self.tab_bar.currentIndex())
+        # Check if the tab name is in the set before removing it
+        if tab_name in self.existing_tab_names:
+            self.existing_tab_names.remove(tab_name)
+
+    def generate_unique_tab_name(self):
+        # Generate a unique tab name
+        tab_name_base = "Tab"
+        count = 1
+        while True:
+            tab_name = f"{tab_name_base} {count}"
+            if tab_name not in self.tab_contents:
+                break
+            count += 1
+        # Add the tab name to the set of existing names
+        self.tab_contents.add(tab_name)
+        return tab_name
 
 
 if __name__ == '__main__':
@@ -179,6 +316,48 @@ if __name__ == '__main__':
     window = TabBarExample()
     window.show()
     app.exec()
+
+# # Create a QTabBar
+# self.tab_bar = QTabBar()
+# self.tab_bar.setExpanding(False)
+# self.tab_bar.setMovable(False)
+# self.tab_bar.setTabsClosable(True)
+#
+# self.tab_bar.setStyleSheet(
+#     """
+#     QTabBar::pane {
+#         background: transparent;
+#         border: none;
+#     }
+#
+#     QTabBar::tab {
+#         background-color: lightblue;
+#         padding: 8px 12px;
+#         font-weight: None;
+#     }
+#
+#     QTabBar::tab:selected {
+#         border-top-left-radius: 4px;
+#         border-top-right-radius: 4px;
+#         background-color: lightblue;
+#         font-weight: bold;
+#     }
+#
+#     QTabBar::close-button {
+#         subcontrol-position: right;
+#     }
+#
+#     QTabBar::close-button:hover {
+#         subcontrol-position: right;
+#         border-radius: 2px;
+#         font-weight: None;
+#     }"""
+# )
+#
+# # Connect the tabChanged signal to a custom slot
+# self.tab_bar.currentChanged.connect(self.tab_changed)
+
+''''''
 
 # def __init__(self):
 #        super().__init__()
