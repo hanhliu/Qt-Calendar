@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # handle SIGINT to make the app terminate on CTRL+C
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling)
+    # QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling)
 
     app = QApplication([])
 
@@ -29,7 +29,7 @@ if __name__ == '__main__':
     graph = NodeGraph()
 
     # set up context menu for the node graph.
-    graph.set_context_menu_from_file('./hotkeys/hotkeys.json')
+    graph.set_context_menu_from_file('./NodeGraphOriginal/hotkeys/hotkeys.json')
 
     # registered example nodes.
     graph.register_nodes([

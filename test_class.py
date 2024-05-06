@@ -3,7 +3,8 @@ import sys
 import signal
 
 from PySide6 import QtCore
-from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QLabel, QComboBox
+from PySide6.QtWidgets import QMainWindow, QApplication, QWidget, QVBoxLayout, QLabel, QComboBox, QPushButton, \
+    QHBoxLayout
 
 from PySide6NodeGraph.nodegraph import (
     NodeGraph,
@@ -32,7 +33,19 @@ class MainWindow(QMainWindow):
         # Create a layout for the central widget
         lay = QVBoxLayout(self.central_widget)
         lay.setContentsMargins(0, 0, 0, 0)
-        lay.addWidget(QLabel("HanhLT"))
+
+        self.button_create_node = QPushButton('Create Node')
+        self.button_create_node.clicked.connect(self.create_node_click)
+
+        self.button_save = QPushButton("SAVE")
+        self.button_save.clicked.connect(self.save_click)
+
+        self.layout_button = QHBoxLayout()
+        self.layout_button.addWidget(self.button_create_node)
+        self.layout_button.addWidget(self.button_save)
+
+        lay.addWidget(QLabel("Node Graph"))
+        lay.addLayout(self.layout_button)
         lay.addWidget(self.graph_widget)
         self.graph_widget.show()
 
@@ -44,7 +57,8 @@ class MainWindow(QMainWindow):
 
         # create graph controller.
         self.graph = NodeGraph()
-
+        self.graph.set_grid_mode(1)
+        self.graph.set_background_color(47, 47, 47)
         # registered example nodes.
         self.graph.register_nodes([
             basic_nodes.BasicNodeA,
@@ -60,51 +74,8 @@ class MainWindow(QMainWindow):
         self.graph_widget = self.graph.widget
         self.graph_widget.resize(1100, 800)
 
-
-        # create node with custom text color and disable it.
-        n_basic_a = self.graph.create_node(
-            'nodes.basic.BasicNodeA', text_color='#feab20')
-        n_basic_a.set_disabled(True)
-
-        # create node and set a custom icon.
-        n_basic_b = self.graph.create_node(
-            'nodes.basic.BasicNodeB', name='custom icon')
-        this_path = os.path.dirname(os.path.abspath(__file__))
-        icon = os.path.join(this_path, 'PySide6NodeGraph/examples', 'star.png')
-        n_basic_b.set_icon(icon)
-
-        # create node with the custom port shapes.
-        n_custom_ports = self.graph.create_node(
-            'nodes.custom.ports.CustomPortsNode', name='custom ports')
-
-        # create node with the embedded QLineEdit widget.
-        n_text_input = self.graph.create_node(
-            'nodes.widget.TextInputNode', name='text node', color='#0a1e20')
-
-        # create node with the embedded QCheckBox widgets.
-        n_checkbox = self.graph.create_node(
-            'nodes.widget.CheckboxNode', name='checkbox node')
-
-        # create node with the QComboBox widget.
-        n_combo_menu = self.graph.create_node(
-            'nodes.widget.DropdownMenuNode', name='combobox node')
-
-        # create group node.
-        n_group = self.graph.create_node('nodes.group.MyGroupNode')
-
-        # make node connections.
-
-        # (connect nodes using the .set_output method)
-        n_text_input.set_output(0, n_custom_ports.input(0))
-        n_text_input.set_output(0, n_checkbox.input(0))
-        n_text_input.set_output(0, n_combo_menu.input(0))
-        # (connect nodes using the .set_input method)
-        n_group.set_input(0, n_custom_ports.output(1))
-        n_basic_b.set_input(2, n_checkbox.output(0))
-        n_basic_b.set_input(2, n_combo_menu.output(1))
-        # (connect nodes using the .connect_to method from the port object)
-        port = n_basic_a.input(0)
-        port.connect_to(n_basic_b.output(0))
+        self.custom_default_create_node()
+        # self.default_init_node()
 
         # auto layout nodes.
         self.graph.auto_layout_nodes()
@@ -149,11 +120,70 @@ class MainWindow(QMainWindow):
         self.nodes_palette.set_category_label('nodes.basic', 'Basic Nodes')
         self.nodes_palette.set_category_label('nodes.group', 'Group Nodes')
 
-        widget = self.graph.get_nodes_by_type('nodes.widget.DropdownMenuNode')[0]
-        for name, widget_child in widget.widgets().items():
-            combo_box: QComboBox = widget_child.get_custom_widget()
-            print(f"HanhLT: combo_Box = {combo_box.currentText()}  ")
+    def custom_default_create_node(self):
+        # create node with the QComboBox widget.
+        n_combo_menu_1 = self.graph.create_node('nodes.widget.DropdownMenuNode', name='Camera')
+        n_combo_menu_2 = self.graph.create_node('nodes.widget.DropdownMenuNode', name='Camera')
+        # (connect nodes using the .connect_to method from the port object)
+        port = n_combo_menu_2.input(0)
+        port.connect_to(n_combo_menu_1.output(0))
 
+    def create_node_click(self):
+        self.graph.create_node('nodes.widget.DropdownMenuNode', name='NEW COMBOBOX NODE')
+
+    def save_click(self):
+        drop_down_list = self.graph.get_nodes_by_type('nodes.widget.DropdownMenuNode')
+        for widget in drop_down_list:
+            for name, widget_child in widget.widgets().items():
+                print(f"HanhLT: widget_child = {widget_child.get_value()}")
+                combo_box: QComboBox = widget_child.get_custom_widget()
+                print(f"HanhLT: combo_Box = {combo_box.currentText()}  ")
+
+    def default_init_node(self):
+        # create node with custom text color and disable it.
+        n_basic_a = self.graph.create_node(
+            'nodes.basic.BasicNodeA', text_color='#feab20')
+        n_basic_a.set_disabled(True)
+
+        # create node and set a custom icon.
+        n_basic_b = self.graph.create_node(
+            'nodes.basic.BasicNodeB', name='custom icon')
+        this_path = os.path.dirname(os.path.abspath(__file__))
+        icon = os.path.join(this_path, 'PySide6NodeGraph/examples', 'star.png')
+        n_basic_b.set_icon(icon)
+
+        # create node with the custom port shapes.
+        n_custom_ports = self.graph.create_node(
+            'nodes.custom.ports.CustomPortsNode', name='custom ports')
+
+        # create node with the embedded QLineEdit widget.
+        n_text_input = self.graph.create_node(
+            'nodes.widget.TextInputNode', name='text node', color='#0a1e20')
+
+        # create node with the embedded QCheckBox widgets.
+        n_checkbox = self.graph.create_node(
+            'nodes.widget.CheckboxNode', name='checkbox node')
+
+        # create node with the QComboBox widget.
+        n_combo_menu = self.graph.create_node(
+            'nodes.widget.DropdownMenuNode', name='combobox node')
+
+        # create group node.
+        n_group = self.graph.create_node('nodes.group.MyGroupNode')
+
+        # make node connections.
+
+        # (connect nodes using the .set_output method)
+        n_text_input.set_output(0, n_custom_ports.input(0))
+        n_text_input.set_output(0, n_checkbox.input(0))
+        n_text_input.set_output(0, n_combo_menu.input(0))
+        # (connect nodes using the .set_input method)
+        n_group.set_input(0, n_custom_ports.output(1))
+        n_basic_b.set_input(2, n_checkbox.output(0))
+        n_basic_b.set_input(2, n_combo_menu.output(1))
+        # (connect nodes using the .connect_to method from the port object)
+        port = n_basic_a.input(0)
+        port.connect_to(n_basic_b.output(0))
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

@@ -17,13 +17,16 @@ class DropdownMenuNode(BaseNode):
         super(DropdownMenuNode, self).__init__()
 
         # create input & output ports
-        self.add_input('in 1')
-        self.add_output('out 1')
-        self.add_output('out 2')
+        self.add_input('IN', multi_input=True)
+        self.add_output('OUT', multi_output=True)
+        # self.add_input('IN', multi_input=True)
+        # self.add_input('IN 2', multi_input=True)
+        # self.add_output('OUT 1', multi_output=True)
+        # self.add_output('OUT 2', multi_output=True)
 
         # create the QComboBox menu.
-        items = ['item 1', 'item 2', 'item 3']
-        self.add_combo_menu('my_menu', 'Menu Test', items=items)
+        items = ['Choose Camera', 'Camera 1111111111111111', 'Camera 222222222222222222222222222222222222222', 'Camera 3']
+        self.add_combo_menu('my_menu', 'Camera List', items=items)
 
 
 class TextInputNode(BaseNode):

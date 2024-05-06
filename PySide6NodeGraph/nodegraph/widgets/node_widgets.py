@@ -259,7 +259,35 @@ class NodeComboBox(NodeBaseWidget):
         super(NodeComboBox, self).__init__(parent, name, label)
         self.setZValue(Z_VAL_NODE_WIDGET + 1)
         combo = QtWidgets.QComboBox()
-        combo.setMinimumHeight(24)
+        combo.setStyleSheet("""
+            QComboBox {
+                border: 1px solid gray;
+                border-radius: 3px;
+                padding: 1px 1px 1px 1px;
+                min-width: 6em;
+            }
+
+            QComboBox::drop-down {
+                subcontrol-origin: padding;
+                subcontrol-position: top right;
+                width: 15px;
+                border-left-width: 1px;
+                border-left-color: darkgray;
+                border-left-style: solid;
+                border-top-right-radius: 3px;
+                border-bottom-right-radius: 3px;
+            }
+
+            QComboBox::down-arrow {
+                image: url(PySide6NodeGraph/nodegraph/widgets/icons/arrow_down.svg);
+            }
+
+            QComboBox QAbstractItemView {
+                border: 1px solid gray;
+                selection-background-color: lightgray;
+            }
+        """)
+        # combo.setMaximumHeight(24)
         combo.addItems(items or [])
         combo.currentIndexChanged.connect(self.on_value_changed)
         combo.clearFocus()
