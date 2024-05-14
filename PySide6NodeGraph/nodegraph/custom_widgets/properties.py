@@ -910,22 +910,24 @@ class NodePropWidget(QtWidgets.QWidget):
                         widget.set_max(prop_range[1])
 
                 prop_window.add_widget(prop_name, widget, value,
-                                       prop_name.replace('_', ' '))
+                                       prop_name.replace('_', ' ').title())
                 widget.value_changed.connect(self._on_property_changed)
 
         # add "Node" tab properties.
         self.add_tab('Node')
-        default_props = ['color', 'text_color', 'disabled', 'id']
+        # default_props = ['color', 'text_color', 'disabled', 'id']
+        default_props = {'color': 'Color', 'text_color': 'Text color', 'disabled': 'Disable', 'id': 'ID'}
+        # default_props = ['Color', 'Text_color', 'Disabled', 'ID']
         prop_window = self.__tab_windows['Node']
-        for prop_name in default_props:
-            wid_type = model.get_widget_type(prop_name)
+        for key, prop_name in default_props.items():
+            wid_type = model.get_widget_type(key)
             WidClass = WIDGET_MAP.get(wid_type)
 
             widget = WidClass()
-            prop_window.add_widget(prop_name,
+            prop_window.add_widget(key,
                                    widget,
-                                   model.get_property(prop_name),
-                                   prop_name.replace('_', ' '))
+                                   model.get_property(key),
+                                   prop_name)
 
             widget.value_changed.connect(self._on_property_changed)
 

@@ -102,7 +102,7 @@ class PropertiesBinWidget(QtWidgets.QWidget):
         self._limit.setMinimum(0)
         self._limit.setValue(2)
         self._limit.valueChanged.connect(self.__on_limit_changed)
-        self.resize(450, 400)
+        self.resize(450, 300)
 
         self._block_signal = False
 
@@ -124,7 +124,7 @@ class PropertiesBinWidget(QtWidgets.QWidget):
         top_layout.addWidget(btn_clr)
 
         layout = QtWidgets.QVBoxLayout(self)
-        layout.addLayout(top_layout)
+        # layout.addLayout(top_layout)
         layout.addWidget(self._prop_list, 1)
 
         # wire up node graph.

@@ -27,8 +27,9 @@ class MainWindow(QMainWindow):
         # Create a central widget
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
-
+        self.camera_names = ['Traffic 00', 'Traffic 030t', 'Traffic 02', 'Camera_192.168.1.250_0', 'Camera_14.241.65.20_00', 'GIAO THONG 01 00t', 'Camera 11 00t', 'Face 1', 'Face 2', 'Face 3', 'Face 4', 'Face 5', 'Face 6', 'Face 7', 'Face 8', 'Face 9', 'Face 10', 'Face 11', 'Face 12', 'Face 13', 'Face 14', 'Face 15', 'Face 16', 'Face 17', 'Face 18', 'Face 19', 'Traffic 040t', 'Traffic 050t', 'Traffic 060t', 'Traffic 07', 'RESTREAM T4 DBQH', 'Camera_14.241.65.20_0', 'VAN PHONG FORWARD 192.168.1.250', 'Camera_14.241.65.122_0', 'Camera_14.241.65.20_1', 'Camera_14.241.65.172_2', 'Camera_14.241.65.147_3', 'Camera_14.241.65.109_0', 'Camera_210.86.224.217_0', 'Camera_123.22.7.105_0', 'Camera_123.22.7.105_0_1', 'Camera_123.22.7.105_1', 'Camera_123.22.7.105_2', 'Camera_14.241.85.150_0', 'Camera_27.72.116.8_0', 'Camera_27.72.116.8_1', 'Camera_27.72.116.8_2', 'Camera_27.72.116.8_3', 'Camera_27.72.116.8_4', 'Camera_27.72.116.8_5', 'Camera_27.72.116.8_6', 'Camera_27.72.116.8_7', 'Camera_27.72.116.8_8', 'Camera_27.72.116.8_9', 'Camera_27.72.116.8_10', 'Camera_27.72.116.8_11', 'Camera_27.72.116.8_12', 'Camera_27.72.116.8_13', 'Camera_27.72.116.8_14', 'Camera_27.72.116.8_15']
         self.create_node_graphic()
+
 
         # Create a layout for the central widget
         lay = QVBoxLayout(self.central_widget)
@@ -69,7 +70,9 @@ class MainWindow(QMainWindow):
             widget_nodes.TextInputNode,
             widget_nodes.CheckboxNode
         ])
-
+        drop_down_node = widget_nodes.DropdownMenuNode(list_camera=self.camera_names)
+        print(f"HanhLT: drop_down_node = {drop_down_node}")
+        self.graph.add_node(drop_down_node)
         # show the node graph widget.
         self.graph_widget = self.graph.widget
         self.graph_widget.resize(1100, 800)
