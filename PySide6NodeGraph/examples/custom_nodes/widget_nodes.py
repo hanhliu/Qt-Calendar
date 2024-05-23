@@ -39,17 +39,21 @@ class TextInputNode(BaseNode):
     __identifier__ = 'nodes.widget'
 
     # initial default node name.
-    NODE_NAME = 'text'
+    NODE_NAME = 'Camera'
 
-    def __init__(self):
+    def __init__(self, value):
         super(TextInputNode, self).__init__()
 
         # create input & output ports
-        self.add_input('in')
-        self.add_output('out')
+        self.add_input('IN', multi_input=True)
+        self.add_output('OUT', multi_output=True)
 
         # create QLineEdit text input widget.
         self.add_text_input('my_input', 'Text Input', tab='widgets')
+        for idx, widget_child in self.widgets().items():
+            line_edit = widget_child.get_custom_widget()
+            line_edit.setText(value)
+            line_edit.setReadOnly(True)
 
 
 class CheckboxNode(BaseNode):

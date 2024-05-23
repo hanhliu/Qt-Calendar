@@ -70,9 +70,6 @@ class MainWindow(QMainWindow):
             widget_nodes.TextInputNode,
             widget_nodes.CheckboxNode
         ])
-        drop_down_node = widget_nodes.DropdownMenuNode(list_camera=self.camera_names)
-        print(f"HanhLT: drop_down_node = {drop_down_node}")
-        self.graph.add_node(drop_down_node)
         # show the node graph widget.
         self.graph_widget = self.graph.widget
         self.graph_widget.resize(1100, 800)
@@ -125,11 +122,85 @@ class MainWindow(QMainWindow):
 
     def custom_default_create_node(self):
         # create node with the QComboBox widget.
-        n_combo_menu_1 = self.graph.create_node('nodes.widget.DropdownMenuNode', name='Camera')
-        n_combo_menu_2 = self.graph.create_node('nodes.widget.DropdownMenuNode', name='Camera')
+        list_widget = []
+        line = widget_nodes.TextInputNode(value='00-camera')
+        line.set_name('Camera')
+        list_widget.append(line)
+
+        line_1 = widget_nodes.TextInputNode(value='01-camera')
+        line_1.set_name('Camera-1')
+        list_widget.append(line_1)
+
+        line_2 = widget_nodes.TextInputNode(value='02-camera')
+        line_2.set_name('Camera-2')
+        list_widget.append(line_2)
+
+        line_3 = widget_nodes.TextInputNode(value='03-camera')
+        line_3.set_name('Camera-3')
+        list_widget.append(line_3)
+
+        line_4 = widget_nodes.TextInputNode(value='04-camera')
+        line_4.set_name('Camera-4')
+        list_widget.append(line_4)
+
+        line_5 = widget_nodes.TextInputNode(value='05-camera')
+        line_5.set_name('Camera-5')
+        list_widget.append(line_5)
+
+        line_6 = widget_nodes.TextInputNode(value='06-camera')
+        line_6.set_name('Camera-6')
+        list_widget.append(line_6)
+
+        line_7 = widget_nodes.TextInputNode(value='07-camera')
+        line_7.set_name('Camera-7')
+        list_widget.append(line_7)
+
+        line_8 = widget_nodes.TextInputNode(value='08-camera')
+        line_8.set_name('Camera-8')
+        list_widget.append(line_8)
+
+        line_9 = widget_nodes.TextInputNode(value='9-camera')
+        line_9.set_name('Camera-9')
+        list_widget.append(line_9)
+
+        line_10 = widget_nodes.TextInputNode(value='10-camera')
+        line_10.set_name('Camera-10')
+        list_widget.append(line_10)
+
+        line_11 = widget_nodes.TextInputNode(value='11-camera')
+        line_11.set_name('Camera-11')
+        list_widget.append(line_11)
+
+        line_12 = widget_nodes.TextInputNode(value='12-camera')
+        line_12.set_name('Camera-12')
+        list_widget.append(line_12)
+
+        line_13 = widget_nodes.TextInputNode(value='13-camera')
+        line_13.set_name('Camera-13')
+        list_widget.append(line_13)
+
+        for node in list_widget:
+            self.graph.add_node(node)
+
         # (connect nodes using the .connect_to method from the port object)
-        port = n_combo_menu_2.input(0)
-        port.connect_to(n_combo_menu_1.output(0))
+        line_8.set_output(0, line_13.input(0))
+        line_9.set_output(0, line_6.input(0))
+
+        line_7.set_output(0, line_4.input(0))
+
+        line_5.set_output(0, line_1.input(0))
+        line_5.set_output(0, line_3.input(0))
+
+        line_10.set_output(0, line_2.input(0))
+        line_10.set_output(0, line_8.input(0))
+        line_10.set_output(0, line_9.input(0))
+
+        line_12.set_output(0, line_5.input(0))
+        line_12.set_output(0, line_7.input(0))
+        line_12.set_output(0, line_10.input(0))
+        line_12.set_output(0, line_11.input(0))
+        line_12.set_output(0, line.input(0))
+
 
     def create_node_click(self):
         self.graph.create_node('nodes.widget.DropdownMenuNode', name='NEW COMBOBOX NODE')
