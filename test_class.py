@@ -28,9 +28,8 @@ class MainWindow(QMainWindow):
         self.central_widget = QWidget()
         self.setCentralWidget(self.central_widget)
         self.camera_names = ['Traffic 00', 'Traffic 030t', 'Traffic 02', 'Camera_192.168.1.250_0', 'Camera_14.241.65.20_00', 'GIAO THONG 01 00t', 'Camera 11 00t', 'Face 1', 'Face 2', 'Face 3', 'Face 4', 'Face 5', 'Face 6', 'Face 7', 'Face 8', 'Face 9', 'Face 10', 'Face 11', 'Face 12', 'Face 13', 'Face 14', 'Face 15', 'Face 16', 'Face 17', 'Face 18', 'Face 19', 'Traffic 040t', 'Traffic 050t', 'Traffic 060t', 'Traffic 07', 'RESTREAM T4 DBQH', 'Camera_14.241.65.20_0', 'VAN PHONG FORWARD 192.168.1.250', 'Camera_14.241.65.122_0', 'Camera_14.241.65.20_1', 'Camera_14.241.65.172_2', 'Camera_14.241.65.147_3', 'Camera_14.241.65.109_0', 'Camera_210.86.224.217_0', 'Camera_123.22.7.105_0', 'Camera_123.22.7.105_0_1', 'Camera_123.22.7.105_1', 'Camera_123.22.7.105_2', 'Camera_14.241.85.150_0', 'Camera_27.72.116.8_0', 'Camera_27.72.116.8_1', 'Camera_27.72.116.8_2', 'Camera_27.72.116.8_3', 'Camera_27.72.116.8_4', 'Camera_27.72.116.8_5', 'Camera_27.72.116.8_6', 'Camera_27.72.116.8_7', 'Camera_27.72.116.8_8', 'Camera_27.72.116.8_9', 'Camera_27.72.116.8_10', 'Camera_27.72.116.8_11', 'Camera_27.72.116.8_12', 'Camera_27.72.116.8_13', 'Camera_27.72.116.8_14', 'Camera_27.72.116.8_15']
+        self.list_node_model = []
         self.create_node_graphic()
-
-
         # Create a layout for the central widget
         lay = QVBoxLayout(self.central_widget)
         lay.setContentsMargins(0, 0, 0, 0)
@@ -39,11 +38,15 @@ class MainWindow(QMainWindow):
         self.button_create_node.clicked.connect(self.create_node_click)
 
         self.button_save = QPushButton("SAVE")
-        self.button_save.clicked.connect(self.save_click)
+        self.button_save.clicked.connect(self.save_nodes_to_model)
+
+        self.button_save_by_name = QPushButton('SAVE BY NAME')
+        self.button_save_by_name.clicked.connect(self.example_usage)
 
         self.layout_button = QHBoxLayout()
         self.layout_button.addWidget(self.button_create_node)
         self.layout_button.addWidget(self.button_save)
+        self.layout_button.addWidget(self.button_save_by_name)
 
         lay.addWidget(QLabel("Node Graph"))
         lay.addLayout(self.layout_button)
@@ -124,65 +127,61 @@ class MainWindow(QMainWindow):
         # create node with the QComboBox widget.
         list_widget = []
         line = widget_nodes.TextInputNode(value='00-camera')
-        line.set_name('Camera')
         list_widget.append(line)
 
         line_1 = widget_nodes.TextInputNode(value='01-camera')
-        line_1.set_name('Camera-1')
         list_widget.append(line_1)
 
         line_2 = widget_nodes.TextInputNode(value='02-camera')
-        line_2.set_name('Camera-2')
         list_widget.append(line_2)
 
         line_3 = widget_nodes.TextInputNode(value='03-camera')
-        line_3.set_name('Camera-3')
         list_widget.append(line_3)
 
         line_4 = widget_nodes.TextInputNode(value='04-camera')
-        line_4.set_name('Camera-4')
         list_widget.append(line_4)
 
         line_5 = widget_nodes.TextInputNode(value='05-camera')
-        line_5.set_name('Camera-5')
         list_widget.append(line_5)
 
         line_6 = widget_nodes.TextInputNode(value='06-camera')
-        line_6.set_name('Camera-6')
         list_widget.append(line_6)
 
         line_7 = widget_nodes.TextInputNode(value='07-camera')
-        line_7.set_name('Camera-7')
         list_widget.append(line_7)
 
         line_8 = widget_nodes.TextInputNode(value='08-camera')
-        line_8.set_name('Camera-8')
         list_widget.append(line_8)
 
         line_9 = widget_nodes.TextInputNode(value='9-camera')
-        line_9.set_name('Camera-9')
         list_widget.append(line_9)
 
         line_10 = widget_nodes.TextInputNode(value='10-camera')
-        line_10.set_name('Camera-10')
         list_widget.append(line_10)
 
         line_11 = widget_nodes.TextInputNode(value='11-camera')
-        line_11.set_name('Camera-11')
         list_widget.append(line_11)
 
         line_12 = widget_nodes.TextInputNode(value='12-camera')
-        line_12.set_name('Camera-12')
         list_widget.append(line_12)
 
         line_13 = widget_nodes.TextInputNode(value='13-camera')
-        line_13.set_name('Camera-13')
         list_widget.append(line_13)
 
-        for node in list_widget:
+        line_14 = widget_nodes.TextInputNode(value='14-camera')
+        list_widget.append(line_14)
+
+        line_15 = widget_nodes.TextInputNode(value='13-camera')
+        list_widget.append(line_15)
+
+        for i, node in enumerate(list_widget):
             self.graph.add_node(node)
+            node.set_name(f'Camera-{i}')
 
         # (connect nodes using the .connect_to method from the port object)
+        line_14.set_output(0, line_15.input(0))
+        line_13.set_output(0, line_14.input(0))
+
         line_8.set_output(0, line_13.input(0))
         line_9.set_output(0, line_6.input(0))
 
@@ -201,6 +200,184 @@ class MainWindow(QMainWindow):
         line_12.set_output(0, line_11.input(0))
         line_12.set_output(0, line.input(0))
 
+    def get_sorted_nodes_by_position(self):
+        self.graph.auto_layout_nodes()
+        
+        nodes = self.graph.all_nodes()
+        # Ensure each node has a 'scene_pos' method or attribute
+        nodes.sort(key=lambda node: (node.x_pos(), node.y_pos()))
+        return nodes
+
+    def save_nodes_in_order(self):
+        sorted_nodes = self.get_sorted_nodes_by_position()
+        visited = set()
+        result = []
+
+        def traverse(node):
+            if node in visited:
+                return
+            visited.add(node)
+            result.append(node)
+
+            for port in node.output_ports():
+                print(f"HanhLT: node.name = {node.name()}")
+                print(f"HanhLT: port = {port}")
+                list_connected_port_id = port.model.connected_ports
+                print(f"HanhLT: connected_port = {list_connected_port_id}")
+                for connection_port_id in list_connected_port_id:
+                    print(f"HanhLT: connection = {connection_port_id}")
+                    connected_node = self.graph.get_node_by_id(connection_port_id)
+                    print(f"HanhLT: connected_node = {connected_node}")
+                    traverse(connected_node)
+                print(f"HanhLT: --------------------------- \n")
+
+        for node in sorted_nodes:
+            if node not in visited:
+                traverse(node)
+
+        return result
+
+    def get_connected_nodes(self, start_node, max_nodes=9):
+        sorted_camera_id_list = []
+        seen_ids = set()
+
+        def traverse(node):
+            if len(sorted_camera_id_list) >= max_nodes:
+                return
+            if node not in seen_ids:
+                seen_ids.add(node)
+                sorted_camera_id_list.append(node)
+                for port in node.output_ports():
+                    connected_port = port.model.connected_ports
+                    for connection in connected_port:
+                        connected_node = self.graph.get_node_by_id(connection)
+                        traverse(connected_node)
+
+        traverse(start_node)
+        return sorted_camera_id_list
+
+    def example_usage(self):
+        def add_connected_nodes(node, port_type, nodes_set):
+            if port_type == "output":
+                ports = node.output_ports()
+            elif port_type == "input":
+                ports = node.input_ports()
+
+            for port in ports:
+                connected_ports = port.model.connected_ports
+                for connection in connected_ports:
+                    connected_node = self.graph.get_node_by_id(connection)
+                    if connected_node not in nodes_set:
+                        nodes_set.add(connected_node)
+                        if len(list_node) < 9:
+                            list_node.append(connected_node)
+                        if port_type == "output":
+                            list_node_output.append(connected_node)
+                        elif port_type == "input":
+                            list_node_input.append(connected_node)
+
+        list_node = []
+        list_node_output = []
+        list_node_input = []
+        seen_ids = set()
+
+        # Start with Camera-13
+        start_node = self.graph.get_node_by_name('Camera-10')
+        list_node.append(start_node)
+        seen_ids.add(start_node)
+
+        # First, add all outputs of the start node
+        add_connected_nodes(start_node, "output", seen_ids)
+
+        # If not enough, add all inputs of the start node
+        if len(list_node) < 9:
+            add_connected_nodes(start_node, "input", seen_ids)
+
+        # If still not enough, recursively add outputs of nodes in the list, then their inputs if necessary
+        index_output = 0
+        while len(list_node) < 9 and (index_output < len(list_node_output)):
+            if index_output < len(list_node_output):
+                current_node = list_node_output[index_output]
+                add_connected_nodes(current_node, "output", seen_ids)
+                index_output += 1
+        if len(list_node) < 9:
+            for node in list_node:
+                add_connected_nodes(node, "output", seen_ids)
+        index_input = 0
+        while len(list_node) < 9 and (index_input < len(list_node_input)):
+            if len(list_node) < 9 and index_input < len(list_node_input):
+                current_node = list_node_input[index_input]
+                add_connected_nodes(current_node, "input", seen_ids)
+                index_input += 1
+        print(f"HanhLT: list_node = {[node.name() for node in list_node]}")
+
+    # def example_usage(self):
+    #     # Example usage with Camera-12
+    #     list_node = []
+    #     list_node_out_put = []
+    #     start_node = self.graph.get_node_by_name('Camera-10')
+    #     list_node.append(start_node)
+    #     for port_out in start_node.output_ports():
+    #         connected_port_out = port_out.model.connected_ports
+    #         for connection_out in connected_port_out:
+    #             if len(list_node) < 9:
+    #                 connected_node_out = self.graph.get_node_by_id(connection_out)
+    #                 list_node.append(connected_node_out)
+    #                 list_node_out_put.append(connected_node_out)
+    #
+    #     for port_in in start_node.input_ports():
+    #         connected_port_in = port_in.model.connected_ports
+    #         for connection_in in connected_port_in:
+    #             if len(list_node) < 9:
+    #                 connected_node_in = self.graph.get_node_by_id(connection_in)
+    #                 list_node.append(connected_node_in)
+    #
+    #     print(f"HanhLT: list_node = {list_node}")
+    #     if len(list_node) < 9:
+    #         for node in list_node:
+    #             # get child connection of node inside list_node
+    #             pass
+    #
+    #     if start_node:
+    #         sorted_camera_id_list = self.get_connected_nodes(start_node)
+    #         print([node.name() for node in sorted_camera_id_list])
+
+    def save_nodes_to_model(self):
+        self.list_node_model.clear()
+        ordered_nodes = self.save_nodes_in_order()
+        print(f"HanhLT: ordered_nodes = {ordered_nodes}")
+        # for node in ordered_nodes:
+        #     node_name = node.name()
+        #     for idx, widget_child in node.widgets().items():
+        #         current_camera_value = widget_child.get_value()  # Assuming get_value returns the QLineEdit text
+        #         dict_input_connect = node.connected_input_nodes()
+        #         dict_output_connect = node.connected_output_nodes()
+        #
+        #         input_list = []
+        #         output_list = []
+        #
+        #         for key_input, value_input in dict_input_connect.items():
+        #             if len(value_input) > 0:
+        #                 for input_node in value_input:
+        #                     input_list.append(input_node.name())
+        #
+        #         for key_output, value_output in dict_output_connect.items():
+        #             if len(value_output) > 0:
+        #                 for output_node in value_output:
+        #                     output_list.append(output_node.name())
+        #
+        #         node_model = {'node_name': node_name,
+        #                       'current_value': current_camera_value,
+        #                       'input_list': input_list,
+        #                       'output_list': output_list}
+        #
+        #         self.list_node_model.append(node_model)
+        #
+        #     # Print the saved node models
+        # for item in self.list_node_model:
+        #     print(f"HanhLT: item.name = {item['node_name']} ")
+        #           # f" item_value={item.current_value}   "
+        #           # f"item_input_list = {item.input_list}     item_output_list = {item.output_list}")
 
     def create_node_click(self):
         self.graph.create_node('nodes.widget.DropdownMenuNode', name='NEW COMBOBOX NODE')
@@ -258,6 +435,7 @@ class MainWindow(QMainWindow):
         # (connect nodes using the .connect_to method from the port object)
         port = n_basic_a.input(0)
         port.connect_to(n_basic_b.output(0))
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
