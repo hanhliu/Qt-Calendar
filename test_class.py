@@ -202,7 +202,7 @@ class MainWindow(QMainWindow):
 
     def get_sorted_nodes_by_position(self):
         self.graph.auto_layout_nodes()
-        
+
         nodes = self.graph.all_nodes()
         # Ensure each node has a 'scene_pos' method or attribute
         nodes.sort(key=lambda node: (node.x_pos(), node.y_pos()))
@@ -282,7 +282,7 @@ class MainWindow(QMainWindow):
         seen_ids = set()
 
         # Start with Camera-13
-        start_node = self.graph.get_node_by_name('Camera-10')
+        start_node = self.graph.get_node_by_name('Camera-11')
         list_node.append(start_node)
         seen_ids.add(start_node)
 
@@ -300,15 +300,17 @@ class MainWindow(QMainWindow):
                 current_node = list_node_output[index_output]
                 add_connected_nodes(current_node, "output", seen_ids)
                 index_output += 1
-        if len(list_node) < 9:
-            for node in list_node:
-                add_connected_nodes(node, "output", seen_ids)
+
         index_input = 0
         while len(list_node) < 9 and (index_input < len(list_node_input)):
             if len(list_node) < 9 and index_input < len(list_node_input):
                 current_node = list_node_input[index_input]
                 add_connected_nodes(current_node, "input", seen_ids)
                 index_input += 1
+
+        if len(list_node) < 9:
+            for node in list_node:
+                add_connected_nodes(node, "output", seen_ids)
         print(f"HanhLT: list_node = {[node.name() for node in list_node]}")
 
     # def example_usage(self):
