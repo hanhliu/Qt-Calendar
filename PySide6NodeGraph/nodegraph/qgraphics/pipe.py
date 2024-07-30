@@ -38,7 +38,7 @@ class PipeItem(QtWidgets.QGraphicsPathItem):
         self._highlight = False
         self._input_port = input_port
         self._output_port = output_port
-        size = 1.5
+        size = 5
         self._arrow = QtGui.QPolygonF()
         self._arrow.append(QtCore.QPointF(-size, size))
         self._arrow.append(QtCore.QPointF(0.0, -size * 1.5))
@@ -133,13 +133,14 @@ class PipeItem(QtWidgets.QGraphicsPathItem):
 
             transform = QtGui.QTransform()
             transform.translate(cen_x, cen_y)
-            radians = math.atan2(tgt_pt.y() - loc_pt.y(),
-                                 tgt_pt.x() - loc_pt.x())
-            degrees = math.degrees(radians) - 90
-            transform.rotate(degrees)
-            if dist < 1.0:
-                transform.scale(dist, dist)
             painter.drawPolygon(transform.map(self._arrow))
+            # radians = math.atan2(tgt_pt.y() - loc_pt.y(),
+            #                      tgt_pt.x() - loc_pt.x())
+            # degrees = math.degrees(radians) - 90
+            # transform.rotate(degrees)
+            # if dist < 1.0:
+            #     transform.scale(dist, dist)
+            # painter.drawPolygon(transform.map(self._arrow))
 
         # QPaintDevice: Cannot destroy paint device that is being painted.
         painter.restore()

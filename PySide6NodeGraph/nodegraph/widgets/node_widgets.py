@@ -29,7 +29,7 @@ class _NodeGroupBox(QtWidgets.QGroupBox):
                 'padding-bottom': '3px',
                 'padding-left': '1px',
                 'padding-right': '1px',
-                'font-size': '9px',
+                'font-size': '14px',
             },
             'QGroupBox::title': {
                 'subcontrol-origin': 'margin',

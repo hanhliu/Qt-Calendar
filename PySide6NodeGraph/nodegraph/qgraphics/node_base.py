@@ -407,7 +407,7 @@ class NodeItem(AbstractNodeItem):
         for port, text in self._input_items.items():
             if port.isVisible():
                 txt_x = port.boundingRect().width() / 2 - txt_offset
-                text.setPos(txt_x, port.y() - 1.5)
+                text.setPos(txt_x+10, port.y() - 1.5)
 
         # adjust output position
         outputs = [p for p in self.outputs if p.isVisible()]
@@ -424,7 +424,7 @@ class NodeItem(AbstractNodeItem):
             if port.isVisible():
                 txt_width = text.boundingRect().width() - txt_offset
                 txt_x = port.x() - txt_width
-                text.setPos(txt_x, port.y() - 1.5)
+                text.setPos(txt_x-8, port.y() - 1.5)
 
     def draw_node(self):
         """

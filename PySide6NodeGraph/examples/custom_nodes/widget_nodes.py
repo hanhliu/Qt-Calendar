@@ -49,7 +49,7 @@ class TextInputNode(BaseNode):
         self.add_output('OUT', multi_output=True)
 
         # create QLineEdit text input widget.
-        self.add_text_input('my_input', 'Text Input', tab='widgets')
+        self.add_text_input('my_input', 'Text Inputttttt', tab='widgets')
         for idx, widget_child in self.widgets().items():
             line_edit = widget_child.get_custom_widget()
             line_edit.setText(value)

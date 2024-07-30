@@ -69,8 +69,8 @@ class PortItem(QtWidgets.QGraphicsItem):
         # painter.drawRect(self.boundingRect())
         # ----------------------------------------------------------------------
 
-        rect_w = self._width / 1.8
-        rect_h = self._height / 1.8
+        rect_w = self._width  # / 1.8
+        rect_h = self._height  # / 1.8
         rect_x = self.boundingRect().center().x() - (rect_w / 2)
         rect_y = self.boundingRect().center().y() - (rect_h / 2)
         port_rect = QtCore.QRectF(rect_x, rect_y, rect_w, rect_h)
