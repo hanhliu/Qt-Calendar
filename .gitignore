@@ -1,0 +1,151 @@
+# This file is used to ignore files which are generated
+# ----------------------------------------------------------------------------
+
+*~
+*.autosave
+*.a
+*.core
+*.moc
+*.o
+*.obj
+*.orig
+*.rej
+*.so
+*.so.*
+*_pch.h.cpp
+*_resource.rc
+*.qm
+.#*
+*.*#
+core
+!core/
+tags
+.DS_Store
+.directory
+*.debug
+Makefile*
+*.prl
+*.app
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+Thumbs.db
+*.res
+*.rc
+/.qmake.cache
+/.qmake.stash
+
+# qtcreator generated files
+*.pro.user*
+CMakeLists.txt.user*
+
+# xemacs temporary files
+*.flc
+
+# Vim temporary files
+.*.swp
+
+# Visual Studio generated files
+*.ib_pdb_index
+*.idb
+*.ilk
+*.pdb
+*.sln
+*.suo
+*.vcproj
+*vcproj.*.*.user
+*.ncb
+*.sdf
+*.opensdf
+*.vcxproj
+*vcxproj.*
+
+# MinGW generated files
+*.Debug
+*.Release
+
+# Python byte code
+*.pyc
+
+# Binaries
+# --------
+# *.dll
+*.exe
+# iVMS_Installer.exe
+
+# Environments
+.venv
+.env
+.myenv
+myenv/
+env/
+venv/
+ENV/
+MYENV/
+env.bak/
+venv.bak/
+myenv.bak/
+
+# If you are using PyCharm #
+# User-specific stuff
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# AWS User-specific
+.idea/**/aws.xml
+
+# Generated files
+.idea/**/contentModel.xml
+
+# Sensitive or high-churn files
+.idea/**/dataSources/
+.idea/**/dataSources.ids
+.idea/**/dataSources.local.xml
+.idea/**/sqlDataSources.xml
+.idea/**/dynamic.xml
+.idea/**/uiDesigner.xml
+.idea/**/dbnavigator.xml
+
+# Gradle
+.idea/**/gradle.xml
+.idea/**/libraries
+.idea/
+# File-based project format
+*.iws
+
+# IntelliJ
+out/
+
+# build
+build/
+dist/
+
+# temp files
+resource_rc.py
+resources_rc.py
+mainwindow.build/
+mainwindow.dist/
+VMS.dist
+VMS.build
+VMS.exe
+VMS.bin
+Resources/
+build_dist
+VMS.onefile-build/
+package/
+VMS.deb
+logs/
+
+python-installer.exe
+python-installer.msi
+
+
+iVMS-cache/
+*.cab
+*.msi
+output-info.ini
+iVMS_noGPU-cache/
+iVMS_noGPU-cache/*

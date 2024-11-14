@@ -1,0 +1,95 @@
+
+
+/* Dark Theme */
+QDialog {
+    background-color: black;
+    color: @text_color_light;
+}
+
+QPushButton#button_1 {
+    background-color: #3c3f41;
+    color: red;
+    border: 1px solid #555;
+    padding: 5px;
+    border-radius: 5px;
+    qproperty-icon: url(assets/settings.svg);
+}
+
+QWidget#widget_test {
+    background-color: red;
+}
+
+QPushButton {
+    background-color: #3c3f41;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    padding: 5px;
+}
+
+QPushButton:hover {
+    background-color: #5a5c5e;
+}
+
+QPushButton:pressed {
+    background-color: #2e2e2e;
+}
+
+QLineEdit {
+    background-color: #3c3f41;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    padding: 5px;
+    border-radius: 5px;
+}
+
+QCheckBox {
+    color: #e0e0e0;
+}
+
+QCheckBox::indicator:unchecked {
+    image: url(:/icons/dark/checkbox_unchecked.svg);
+}
+
+QCheckBox::indicator:checked {
+    image: url(:/icons/dark/checkbox_checked.svg);
+}
+
+QComboBox {
+    background-color: #3c3f41;
+    color: #e0e0e0;
+    border: 1px solid #555;
+}
+
+QLabel {
+    color: #e0e0e0;
+}
+
+QToolButton {
+    background-color: transparent;
+}
+
+QToolButton:hover {
+    background-color: #5a5c5e;
+}
+
+/* Icon for dark mode */
+QToolButton#myButton {
+    qproperty-icon: url(:/icons/dark/my_icon.svg);
+}
+
+QComboBox {
+    background-color: transparent;
+    border: 1px solid #5a5c5e;
+    border-radius: 4px;
+    padding: 4px;
+}
+QComboBox::down-arrow {
+    image: url(assets/sort-down.svg);
+}
+QComboBox::drop-down {
+    border-left: 1px solid #5a5c5e;
+}
+
+QMainWindow {
+    background-color: @background_dark;
+}

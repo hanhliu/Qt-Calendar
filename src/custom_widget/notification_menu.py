@@ -239,7 +239,7 @@ class ItemNotification(QStandardItem):
         self.layout_image_event.setAlignment(Qt.AlignmentFlag.AlignCenter)
         # Load an image using QPixmap
         self.image_label = QLabel()
-        pixmap = QPixmap("/assets/image_event.png")  # Replace with the actual image file path
+        pixmap = QPixmap("/assets/image_event.svg")  # Replace with the actual image file path
         self.image_label.setPixmap(pixmap)
         self.label_time = QLabel("10:10:10")
         self.label_time.setAlignment(Qt.AlignmentFlag.AlignCenter)

@@ -1,0 +1,16 @@
+@primary_dark = #5B5B9F
+@text_color_dark = #F7F0F7
+@text_place_holder_dark = #656475
+@text_disable_dark = #656475
+@on_background_dark = #2B2A3A
+@background_dark = #181824
+@divider_dark = #F7F0F7  /* use for border of QComboBox, QLineEdit focus*/
+@divider_disable_dark = #656475  /* use for border of QComboBox, QLineEdit not focus*/
+@hover_primary_dark = ''
+
+# common color for both theme
+@primary_red = #B5122E
+@primary_green = #1CD1A1
+@white = #FFFFFF
+@black = #000000
+@error = #FF0000

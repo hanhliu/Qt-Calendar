@@ -1,0 +1,16 @@
+@primary_light = #5B5B9F
+@text_color_light = #717171
+@text_place_holder_light = #CDCDCD
+@text_disable_light = #CDCDCD
+@on_background_light = #FBFBFB
+@background_light = #D7D7D7
+@divider_light = #717171  /* use for border of QComboBox, QLineEdit focus */
+@divider_disable_light = #CDCDCD  /* use for border of QComboBox, QLineEdit not focus */
+@hover_primary_light = ''
+
+# common color for both theme
+@primary_red = #B5122E
+@primary_green = #1CD1A1
+@white = #FFFFFF
+@black = #000000
+@error = #FF0000

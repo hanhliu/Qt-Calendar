@@ -53,11 +53,11 @@ class LayersList(QWidget):
     def expand(self):
         if self.currently_expanded:
             self.layer_list.setMaximumHeight(0)
-            self.expand_button.setIcon(QIcon(os.path.join(PATH, 'sort-down.png')))
+            self.expand_button.setIcon(QIcon(os.path.join(PATH, 'sort-down.svg')))
             self.currently_expanded = False
         else:
             self.layer_list.setMaximumHeight(self.resized_size)
-            self.expand_button.setIcon(QIcon(os.path.join(PATH, 'sort-up.png')))
+            self.expand_button.setIcon(QIcon(os.path.join(PATH, 'sort-up.svg')))
             self.currently_expanded = True
 
     def set_styling(self):

@@ -27,7 +27,7 @@ class ItemGridCustom(QStandardItem):
         self.image_grid = QLabel()
         self.image_grid.setFixedSize(32, 32)
         self.image_grid.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        pixmap = QPixmap("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/image_event.png")  # Replace with the actual image file path
+        pixmap = QPixmap("/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/image_event.svg")  # Replace with the actual image file path
         self.image_grid.setPixmap(pixmap)
 
         self.label_name_grid = QLabel(f"{self.model.grid_count} Divisions")

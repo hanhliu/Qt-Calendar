@@ -24,11 +24,12 @@ class CustomPagination(QWidget):
         self.pagination_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         self.pagination_layout.setSpacing(2)
         self.widget_indicator_numer = QWidget()
-        self.widget_indicator_numer.setFixedWidth(180)
-        self.layout_indicator_numer = QHBoxLayout(self.widget_indicator_numer)
+        self.widget_indicator_numer.setStyleSheet('background-color: lightblue')
+        self.widget_indicator_numer.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        self.layout_indicator_numer = QHBoxLayout()
         self.layout_indicator_numer.setSpacing(2)
         self.layout_indicator_numer.setContentsMargins(0, 0, 0, 0)
-        self.layout_indicator_numer.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.layout_indicator_numer.setAlignment(Qt.AlignmentFlag.AlignLeft)
 
         # Style sheet
         self.btn_active = f'''
@@ -89,6 +90,7 @@ class CustomPagination(QWidget):
 
         # Page buttons dynamically
         self.generate_page_buttons()
+        self.widget_indicator_numer.setLayout(self.layout_indicator_numer)
         self.pagination_layout.addWidget(self.widget_indicator_numer)
 
         self.pagination_layout.addWidget(self.next_button)

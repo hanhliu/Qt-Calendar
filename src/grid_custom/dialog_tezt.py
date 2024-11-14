@@ -120,14 +120,14 @@ class DialogTezt(QDialog):
             }
 
             QSpinBox::up-button {
-                image:url(/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/sort-up.png);
+                image:url(/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/sort-up.svg);
                 width:10px;
                 height:10px;
                 padding:2px 5px 0px 0px;
             }
 
             QSpinBox::down-button {
-                image:url(/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/sort-down.png);
+                image:url(/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/sort-down.svg);
                 width:10px;
                 height:10px;
                 padding:2px 5px 0px 0px;
@@ -149,14 +149,14 @@ class DialogTezt(QDialog):
             }
 
             QSpinBox::up-button {
-                image:url(/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/sort-up.png);
+                image:url(/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/sort-up.svg);
                 width:10px;
                 height:10px;
                 padding:2px 5px 0px 0px;
             }
 
             QSpinBox::down-button {
-                image:url(/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/sort-down.png);
+                image:url(/Users/hanhluu/Documents/Project/Qt/calendar_project/assets/sort-down.svg);
                 width:10px;
                 height:10px;
                 padding:2px 5px 0px 0px;
