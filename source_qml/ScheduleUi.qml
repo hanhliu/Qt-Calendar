@@ -533,7 +533,10 @@ Rectangle {
                                                 color: highlighted ? "#1CD1A1" : "transparent"  // Highlight selection
                                             }
 
-                                            onClicked: unit_dropdown.currentIndex = index
+                                            onClicked: {
+                                                unit_dropdown.currentIndex = index;
+                                                unit_dropdown.popup.close();  // 🔹 Manually close the popup
+                                            }
                                         }
                                     }
                                 }

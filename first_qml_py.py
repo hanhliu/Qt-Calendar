@@ -160,7 +160,7 @@ class SelectionManager(QObject):
     @Slot()
     def getSelectedTimes(self):
         selected_times = {}
-        days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+        days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Satureday", "Sunday"]
 
         for day_index in range(7):
             selected_hours = []
@@ -170,15 +170,29 @@ class SelectionManager(QObject):
 
             # Nhóm giờ liên tục lại
             if selected_hours:
-                time_ranges = []
+                day_schedule = {}
+
                 start = selected_hours[0]
                 for i in range(1, len(selected_hours)):
                     if selected_hours[i] != selected_hours[i - 1] + 1:
-                        time_ranges.append(f"{start}:00-{selected_hours[i-1]+1}:00")
-                        start = selected_hours[i]
-                time_ranges.append(f"{start}:00-{selected_hours[-1]+1}:00")  # Thêm khoảng cuối cùng
+                        # Khi có khoảng trống, kết thúc đoạn trước
+                        end = selected_hours[i - 1] + 1
+                        day_schedule[str(start)] = "start"
+                        for h in range(start + 1, end):
+                            day_schedule[str(h)] = "restart"
+                        day_schedule[str(end)] = "stop"
 
-                selected_times[days[day_index]] = time_ranges
+                        # Bắt đầu đoạn tiếp theo
+                        start = selected_hours[i]
+
+                # Xử lý đoạn cuối cùng
+                end = selected_hours[-1] + 1
+                day_schedule[str(start)] = "start"
+                for h in range(start + 1, end):
+                    day_schedule[str(h)] = "restart"
+                day_schedule[str(end)] = "stop"
+
+                selected_times[days[day_index]] = day_schedule
 
         return selected_times
 
@@ -211,10 +225,10 @@ class MainWindow(QMainWindow):
 
     @Slot()
     def getAllValue(self):
-        # print(f"HanhLT: value fps = {self.selection_manager.fps_value}")
-        # print(f"HanhLT: value quality = {self.selection_manager.quality_index}")
-        # print(f"HanhLT: value time archieve = {self.selection_manager.time_archieve}")
-        # print(f"HanhLT: value time unit = {self.selection_manager.time_unit_index}")
+        print(f"HanhLT: value fps = {self.selection_manager.fps_value}")
+        print(f"HanhLT: value quality = {self.selection_manager.quality_index}")
+        print(f"HanhLT: value time archieve = {self.selection_manager.time_archieve}")
+        print(f"HanhLT: value time unit = {self.selection_manager.time_unit_index}")
 
         times = self.selection_manager.getSelectedTimes()
         print(f"HanhLT: times = { times}")
